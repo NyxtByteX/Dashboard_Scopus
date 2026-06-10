@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 
 # --- 1. CONFIGURACIÓN DEL ENTORNO EMPRESARIAL ---
 st.set_page_config(
@@ -11,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilo CSS personalizado para mantener la estética Dark Mode Estricta
+# Estilo CSS personalizado para la estética Dark Mode Estricta (Cian y Rosa Neón)
 st.markdown("""
     <style>
         .reportview-container { background: #0E1117; }
@@ -24,10 +23,10 @@ st.markdown("""
 # --- 2. MOTOR DE PROCESAMIENTO DE DATOS ---
 @st.cache_data
 def load_and_process_data():
+    # Carga de la base de datos Scopus entregada
     df = pd.read_csv('scopus_PA3.csv')
     df['Cited by'] = df['Cited by'].fillna(0).astype(int)
     df['Year'] = df['Year'].fillna(2025).astype(int)
-    df['Revista Corta'] = df['Source title'].str[:35] + '...'
     df['Abstract_Clean'] = df['Abstract'].fillna('').str.lower()
     return df
 
@@ -35,22 +34,23 @@ def main():
     try:
         df = load_and_process_data()
     except Exception:
-        st.error("🚨 Error crítico: No se encontró la base de datos de Scopus 'scopus_PA3.csv'.")
+        st.error("🚨 Error crítico: No se encontró la base de datos de Scopus 'scopus_PA3.csv' en la raíz.")
         return
 
-    # --- BARRA LATERAL ---
+    # --- BARRA LATERAL (Filtros Globales que controlan TODO el sistema) ---
     with st.sidebar:
         st.image("https://cdn-icons-png.flaticon.com/512/2103/2103832.png", width=50)
-        st.title("Filtros de Control")
+        st.title("Filtros Globales")
         st.markdown("---")
         
-        busqueda = st.text_input("🔍 Buscar término técnico:", "")
-        min_citas = st.slider("📈 Mínimo de citas del paper:", 0, int(df['Cited by'].max()), 0)
+        busqueda = st.text_input("🔍 Filtrar papers por término técnico:", "")
+        max_citas_posibles = int(df['Cited by'].max()) if len(df) > 0 else 100
+        min_citas = st.slider("📈 Nivel de rigor científico (Mínimo citas):", 0, max_citas_posibles, 0)
         
         st.markdown("---")
-        st.caption("🔒 ChurnAI Enterprise v2.6. Mercado Peruano 2025-2026.")
+        st.caption("🔒 ChurnAI Enterprise v3.0. Modelo Predictivo Conectado 2025-2026.")
 
-    # Filtros de la base de datos
+    # APLICACIÓN DE FILTRADO GLOBAL DE INFORMACIÓN
     df_filtrado = df[df['Cited by'] >= min_citas]
     if busqueda:
         df_filtrado = df_filtrado[df_filtrado['Abstract_Clean'].str.contains(busqueda.lower()) | 
@@ -58,40 +58,60 @@ def main():
 
     # --- ENCABEZADO CORPORATIVO ---
     st.title("🔮 ChurnAI Analytics Hub")
-    st.subheader("Plataforma Financiera de Onboarding y Simulación Predictiva adaptada a Banca Peruana")
+    st.subheader("Plataforma de Simulación Científica de Churn Conectada para la Banca Peruana")
     
     st.markdown("""
     <div style='background-color: #161B22; padding: 20px; border-radius: 8px; border-left: 5px solid #FF1493; margin-bottom: 25px;'>
         <h4 style='color: #FF1493; margin-top:0;'>📌 ESTRATEGIA CENTRAL DE INVESTIGACIÓN (PERÚ 2025-2026)</h4>
         <p style='color: #E6EDF3; font-size: 1.05rem; line-height: 1.6;'>
             <b>¿Cómo optimiza el uso de machine learning la predicción de la fuga de clientes (customer churn) en el sector bancario?</b><br>
-            La optimización se logra al procesar patrones transaccionales complejos en tiempo real. En el mercado peruano, los algoritmos de Machine Learning detectan anomalías de comportamiento (como la reducción de uso de billeteras digitales o migración de haberes) antes de que el cliente finalice la baja, permitiendo ejecutar acciones de retención de manera automatizada y quirúrgica.
-        </p>
-        <p style='color: #8B949E; font-size: 0.85rem; margin-bottom: 0;'>
-            <b>Keywords:</b> Machine learning • Customer churn • Banking • Prediction
+            La optimización se logra al procesar patrones transaccionales en tiempo real. En el mercado peruano, este Hub conecta la evidencia de la literatura internacional indexada en Scopus con los disparadores críticos locales (billeteras digitales como Yape/Plin, portabilidades de Cuenta Sueldo y deudas reportadas en la SBS).
         </p>
     </div>
     """, unsafe_allow_html=True)
 
+    # --- CÁLCULO EN TIEMPO REAL DE LA RELEVANCIA CIENTÍFICA (EL CONECTOR DEL SISTEMA) ---
+    menciones_trans = df_filtrado['Abstract_Clean'].str.contains('transaction|behavio|digital|channel').sum()
+    menciones_score = df_filtrado['Abstract_Clean'].str.contains('credit score|credit history|credit|risk|sbs').sum()
+    menciones_demo  = df_filtrado['Abstract_Clean'].str.contains('demograph|age|gender|income|status').sum()
+    
+    total_menciones = menciones_trans + menciones_score + menciones_demo
+    
+    # Pesos dinámicos basados en la literatura filtrada (si no hay datos, se asigna un baseline balanceado)
+    if total_menciones > 0:
+        peso_trans_raw = menciones_trans / total_menciones
+        peso_score_raw = menciones_score / total_menciones
+        peso_demo_raw  = menciones_demo / total_menciones
+    else:
+        peso_trans_raw, peso_score_raw, peso_demo_raw = 0.50, 0.30, 0.20
+
+    # Normalización para la fórmula del simulador
+    w_trans = peso_trans_raw * 0.8
+    w_score = peso_score_raw * 0.8
+    w_demo  = peso_demo_raw * 0.8
+
     # --- PESTAÑAS OPERATIVAS ---
     tab1, tab2, tab3 = st.tabs([
         "📊 Métricas y Variables de la Industria", 
-        "🔮 Simulador de Proyección de Riesgo (Banca Perú)", 
+        "🔮 Simulador de Riesgo Conectado (Bancos Perú)", 
         "📚 Repositorio Scopus Inteligente"
     ])
 
     # =========================================================================
-    # PESTAÑA 1: GRÁFICOS ANALÍTICOS (MÉTRICAS Y VARIABLES)
+    # PESTAÑA 1: GRÁFICOS ANALÍTICOS DINÁMICOS
     # =========================================================================
     with tab1:
+        st.markdown("### 🧬 Diagnóstico de Tendencias Científicas Actuales")
+        st.markdown("Los gráficos a continuación reflejan de forma dinámica el peso del conocimiento científico extraído de los papers según los filtros actuales.")
+        
         colC, colD = st.columns(2)
         
         with colC:
-            st.markdown("### 🎯 Métricas de Evaluación")
+            st.markdown("#### 🎯 Métricas de Evaluación Preferidas")
             metricas_data = [
-                {'Metrica': 'Accuracy', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('accuracy').sum(), 'Desc': 'Porcentaje general de aciertos.'},
-                {'Metrica': 'F1-Score', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('f1|f-measure').sum(), 'Desc': 'Balance crítico entre precisión y reclamos.'},
-                {'Metrica': 'AUC-ROC', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('auc|roc').sum(), 'Desc': 'Capacidad para diferenciar clientes leales de clientes en riesgo.'}
+                {'Metrica': 'Accuracy', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('accuracy').sum(), 'Desc': 'Porcentaje general de aciertos del modelo.'},
+                {'Metrica': 'F1-Score', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('f1|f-measure').sum(), 'Desc': 'Equilibrio crítico entre falsos positivos y falsos negativos.'},
+                {'Metrica': 'AUC-ROC', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('auc|roc').sum(), 'Desc': 'Capacidad del modelo para discriminar entre un cliente leal y uno en riesgo.'}
             ]
             df_metrics = pd.DataFrame(metricas_data)
             
@@ -106,11 +126,11 @@ def main():
                 st.write("**¿Cómo se lee esta sección?** Entre más lejano esté el vértice del centro, mayor es la adopción de esa métrica en soluciones reales de Churn.")
 
         with colD:
-            st.markdown("### 🧩 Variables Predictoras")
+            st.markdown("#### 🧩 Distribución de Impacto de las Variables (Driving Forces)")
             features_data = [
-                {'Categoria': 'Transacciones', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('transaction|behavio').sum(), 'Desc': 'Fluctuación de saldos y uso de canales.'},
-                {'Categoria': 'Credit Score', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('credit score|credit history').sum(), 'Desc': 'Historial de deudas e índices de riesgo externo.'},
-                {'Categoria': 'Demografía', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('demograph|age|gender').sum(), 'Desc': 'Edad del portador, ingresos y geolocalización.'}
+                {'Categoria': 'Uso de Canales y Transacciones', 'Menciones': menciones_trans, 'Desc': 'Fluctuación de saldos en cuentas y uso de canales digitales.'},
+                {'Categoria': 'Comportamiento Crediticio', 'Menciones': menciones_score, 'Desc': 'Evolución del historial crediticio y deudas en el sistema.'},
+                {'Categoria': 'Perfil Demográfico y Estado', 'Menciones': menciones_demo, 'Desc': 'Atributos base del usuario y tipos de cuenta contratados.'}
             ]
             df_feat = pd.DataFrame(features_data)
             
@@ -125,61 +145,72 @@ def main():
                 st.write("**¿Cómo se lee esta sección?** El tamaño de los rectángulos es proporcional a su impacto predictivo; cuadros grandes equivalen a variables críticas de comportamiento.")
 
     # =========================================================================
-    # PESTAÑA 2: SIMULADOR DE ESCENARIOS - BANCOS PERUANOS
+    # PESTAÑA 2: SIMULADOR DE ESCENARIOS BANCA PERÚ (CONECTADO MATEMÁTICAMENTE)
     # =========================================================================
     with tab2:
-        st.markdown("### 🔮 Módulo de Proyección de Riesgo de Churn en el Contexto Peruano")
-        st.markdown("Modifica las variables operativas del cliente para proyectar su probabilidad de abandono según las métricas de Machine Learning aplicadas a la banca local.")
+        st.markdown("### 🔮 Módulo de Proyección de Riesgo Calibrado por Evidencia Científica")
+        
+        # Alerta visual que demuestra la conexión real de datos
+        st.info(f"🔗 **Conexión Activa:** El motor algorítmico está calculando el riesgo usando la configuración de pesos extraída de los {len(df_filtrado)} papers filtrados en este momento. "
+                f"(Peso Transaccional: {w_trans*100:.1f}% | Peso Scoring: {w_score*100:.1f}% | Peso Perfil: {w_demo*100:.1f}%)")
         
         col_sim1, col_sim2 = st.columns([1, 1])
         
         with col_sim1:
-            st.markdown("#### ⚙️ Entrada de Datos del Cliente (Variables Predictoras)")
+            st.markdown("#### ⚙️ Variables Operativas del Cliente Peruano")
             
             banco_seleccionado = st.selectbox(
-                "Selecciona la entidad del ecosistema financiero local a evaluar:",
+                "Selecciona el banco del ecosistema financiero local a evaluar:",
                 ["Banco de Crédito del Perú (BCP)", "BBVA Perú", "Interbank", "Scotiabank Perú"]
             )
             
-            caida_trans = st.slider("1. ¿Qué porcentaje de reducción presenta en su actividad digital (Yape / Plin, transferencias interbancarias) en el último mes? (%)", 0, 100, 25)
-            score_infocorp = st.slider("2. ¿Cuál es el Score Crediticio interno del cliente (ej. Sentinel / SBS / Equifax)?", 300, 850, 680)
-            portabilidad_sueldo = st.radio("3. ¿El sistema detecta solicitudes pendientes de portabilidad de Cuenta Sueldo o retiro total de CTS?", ["No", "Sí"])
+            # Formulación de preguntas con arraigo en la banca nacional
+            caida_trans = st.slider("1. ¿Qué porcentaje de reducción presenta en su actividad digital local (Uso de Yape / Plin, transferencias interbancarias vía CCE) en el último mes? (%)", 0, 100, 25)
+            score_infocorp = st.slider("2. ¿Cuál es el Score Crediticio del cliente en centrales de riesgo nacionales (Sentinel / SBS / Equifax)?", 300, 850, 680)
+            portabilidad_sueldo = st.radio("3. ¿El sistema reporta solicitudes de portabilidad de Cuenta Sueldo a otro banco o retiro total de CTS?", ["No", "Sí"])
             
-            # Algoritmo interno de proyección simulado ajustado al perfil local
+            # CÁLCULO DE RIESGO 100% DINÁMICO E INTERCONECTADO CON LOS GRÁFICOS
             riesgo_calculado = 10.0
-            riesgo_calculado += (caida_trans * 0.60)
-            riesgo_calculado += ((850 - score_infocorp) * 0.07)
+            riesgo_calculado += (caida_trans * w_trans * 1.5)
+            riesgo_calculado += ((850 - score_infocorp) * w_score * 0.2)
             if portabilidad_sueldo == "Sí":
-                riesgo_calculado += 25.0
+                riesgo_calculado += (30.0 * (w_demo + 0.5))
+            
+            # Variaciones de fricción según la entidad del ecosistema nacional
+            if "BCP" in banco_seleccionado:
+                riesgo_calculado += 2.0  # Ajuste por alta competitividad en ecosistema Yape
+            elif "BBVA" in banco_seleccionado:
+                riesgo_calculado -= 1.0  # Ajuste por retención pasiva de cuentas de haberes
+                
             riesgo_final = min(max(riesgo_calculado, 0.0), 100.0)
 
         with col_sim2:
             st.markdown(f"#### 🎯 Proyección de Fuga para {banco_seleccionado}")
-            
             color_alerta = "#00CED1" if riesgo_final < 50 else "#FF1493"
             
             st.markdown(f"""
             <div style='background-color: #161B22; padding: 25px; border-radius: 10px; border: 2px solid {color_alerta}; text-align: center;'>
-                <p style='color: #E6EDF3; font-size: 1.2rem; margin-bottom: 5px;'>PROYECCIÓN DE PROBABILIDAD DE CHURN</p>
+                <p style='color: #E6EDF3; font-size: 1.2rem; margin-bottom: 5px;'>PROYECCIÓN DE PROBABILIDAD DE CHURN ACTUALIZADA</p>
                 <h1 style='color: {color_alerta} !important; font-size: 3.5rem; margin: 0;'>{riesgo_final:.1f}%</h1>
             </div>
             """, unsafe_allow_html=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### 📋 Plan de Acción Operativo (SBS / Regulación Local)")
+            st.markdown("#### 📋 Plan de Acción Operativo (Alineado a la Regulación SBS)")
             
+            # Ejecución de planes de retención contextualizados a Perú
             if riesgo_final < 40:
-                st.success(f"🟢 **Riesgo Bajo / Estable:** El cliente mantiene alta fidelidad. Mantener el envío de campañas cruzadas estándar (ej. Beneficios con Millas Benefit/LATAM Pass o promociones exclusivas en la App del banco).")
+                st.success(f"🟢 **Riesgo Bajo / Estable:** El cliente mantiene alta fidelidad transaccional. Continuar con pautas automáticas de venta cruzada (Campañas de Millas LATAM Pass, Puntos BBVA o Beneficios Interbank Benefit según la entidad).")
             elif 40 <= riesgo_final < 70:
-                st.warning(f"🟡 **Alerta Moderada / Retención Preventiva:** Descenso marcado en transacciones. El motor de ML sugiere la exoneración automatizada de la membresía de la Tarjeta de Crédito o la oferta de una tasa preferencial para Préstamo Personal.")
+                st.warning(f"🟡 **Alerta Moderada / Retención Preventiva:** Descenso marcado en canales digitales. El motor sugiere activar la exoneración automatizada de la membresía de la tarjeta de crédito u ofrecer una campaña de Tasa Preferencial de Compra de Deuda para mitigar la fuga hacia competidores.")
             else:
-                st.error(f"🔴 **Alerta Crítica / Intervención Inmediata:** Alta probabilidad de fuga de fondos. Prioridad máxima para el equipo de Telemarketing del banco. El protocolo exige asignación directa a un ejecutivo elite para contraofertar beneficios en la Cuenta Sueldo en menos de 12 horas.")
+                st.error(f"🔴 **Alerta Crítica / Intervención Inmediata:** Alta probabilidad de pérdida del cliente. Prioridad máxima para el equipo de Telemarketing. El protocolo exige la asignación inmediata de un asesor Élite para contraofertar beneficios en la Cuenta Sueldo y retener los fondos en menos de 12 horas.")
 
-        with st.expander("Base teórica: Explicación de las variables en Perú"):
+        with st.expander("Base teórica: Explicación de las variables en el mercado peruano"):
             st.markdown("""
-            * **Yape / Plin / Transferencias:** Al ser herramientas de uso diario en Perú, un decaimiento en esta variable es el predictor de corto plazo más potente (indica pérdida de transaccionalidad).
-            * **Sentinel / Equifax / SBS:** Si el cliente baja su score crediticio externo o incrementa sus deudas en otros bancos, el modelo detecta que está buscando financiamiento afuera, aumentando el riesgo de abandono definitivo.
-            * **Cuenta Sueldo / CTS:** El núcleo de la rentabilidad del cliente minorista peruano. Si hay un intento de portabilidad de haberes, la probabilidad de Churn se dispara de forma crítica.
+            * **Yape / Plin / CCE:** Herramientas fundamentales de bancarización y uso diario en Perú. La caída transaccional en estas redes es el indicador de corto plazo más potente para predecir fugas.
+            * **Sentinel / Equifax / SBS:** El endeudamiento externo reportado ante la Superintendencia de Banca, Seguros y AFP (SBS) altera el score del cliente, indicando que busca productos financieros fuera de nuestra entidad.
+            * **Cuenta Sueldo y CTS:** Constituyen el núcleo de la lealtad e ingresos del cliente minorista peruano. Una solicitud de portabilidad o retiro total implica una deserción inminente.
             """)
 
         with st.expander("📖 Guía de Interpretación de esta Sección"):
@@ -219,7 +250,7 @@ def main():
             if "Year" in columnas_mapeadas: 
                 config_columnas["Year"] = st.column_config.NumberColumn("Año", format="%d")
             if "Cited by" in columnas_mapeadas: 
-                config_columnas["Cited by"] = st.column_config.ProgressColumn("Citas", format="%d", min_value=0, max_value=int(df['Cited by'].max()))
+                config_columnas["Cited by"] = st.column_config.ProgressColumn("Citas", format="%d", min_value=0, max_value=max_citas_posibles)
             if "Source title" in columnas_mapeadas: 
                 config_columnas["Source title"] = st.column_config.TextColumn("Revista / Source Title")
             if "Link" in columnas_mapeadas: 
