@@ -151,7 +151,7 @@ def main():
         "📚 Centro de Datos e Insights"
     ])
 
-    # =========================================================================
+# =========================================================================
     # PESTAÑA 1: DASHBOARD DE CONTROL ESTILO GECKBOARD / QLIK FINANCE
     # =========================================================================
     with tab1:
@@ -180,20 +180,20 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-        # 3. NUEVA FILA DE GRÁFICOS: ENFOQUE MULTIVARIABLE Y METODOLÓGICO
-        col_g1, col_g2, col_g3 = st.columns([1.2, 1, 1])
+        # 3. NUEVA DISTRIBUCIÓN - FILA A: DOS GRÁFICOS DE BARRAS SIMÉTRICOS
+        col_barras1, col_barras2 = st.columns(2)
         
-        with col_g1:
+        with col_barras1:
             st.markdown("#### 🧠 Densidad de Conceptos de Riesgo en la Literatura")
             conceptos = ['churn', 'risk', 'accuracy', 'credit', 'transaction', 'banking', 'neural']
             conteos = [df_filtrado['Abstract_Clean'].str.contains(c).sum() for c in conceptos]
             df_conceptos = pd.DataFrame({'Concepto': [c.upper() for c in conceptos], 'Frecuencia': conteos}).sort_values(by='Frecuencia', ascending=True)
             
             fig_words = px.bar(df_conceptos, x='Frecuencia', y='Concepto', orientation='h', template='plotly_dark', color='Frecuencia', color_continuous_scale=['#FF1493', "#00CED1"])
-            fig_words.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=10, b=10))
+            fig_words.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=15, b=10))
             st.plotly_chart(fig_words, use_container_width=True)
 
-        with col_g2:
+        with col_barras2:
             st.markdown("#### 🎯 Predominancia de Métricas")
             metricas_data = [
                 {'Métrica': 'Accuracy', 'Papers': df_filtrado['Abstract_Clean'].str.contains('accuracy').sum()},
@@ -202,21 +202,26 @@ def main():
             ]
             df_m = pd.DataFrame(metricas_data).sort_values(by="Papers", ascending=True)
             fig_bar = px.bar(df_m, x="Papers", y="Métrica", orientation="h", template="plotly_dark", color="Papers", color_continuous_scale=["#FF1493", "#00CED1"])
-            fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=10, b=10))
+            fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=15, b=10))
             st.plotly_chart(fig_bar, use_container_width=True)
 
-        with col_g3:
-            st.markdown("#### 🔬 Origen de Validación Académica")
+        st.markdown("---") # Línea divisoria elegante para separar secciones
+
+        # 4. NUEVA DISTRIBUCIÓN - FILA B: ORIGEN DE VALIDACIÓN (CENTRALIZADO Abajo)
+        col_pie_izq, col_pie_centro, col_pie_der = st.columns([0.5, 1, 0.5]) # Usamos columnas laterales vacías para centrar el gráfico
+        with col_pie_centro:
+            st.markdown("<h4 style='text-align: center;'>🔬 Origen de Validación Académica (Distribución de Literatura)</h4>", unsafe_allow_html=True)
             if len(df_filtrado) > 0:
                 fig_pie = px.pie(df_filtrado, names='Document Type', template='plotly_dark', hole=0.4, color_discrete_sequence=["#00CED1", "#FF1493", "#FFFF00", "#FF4500"])
-                fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=10, r=10, t=10, b=10))
+                fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=10, r=10, t=10, b=10), legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
                 st.plotly_chart(fig_pie, use_container_width=True)
             else:
                 st.caption("Sin datos para segmentar.")
 
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.markdown("---")
         
-        # 4. GRÁFICA DE TENDENCIAS CONTINUAS
+        # 5. GRÁFICA DE TENDENCIAS CONTINUAS Y MADUREZ (SE MANTIENE ABAJO COMO LÍNEA FINAL)
         col_trend, col_violin = st.columns([2, 1])
         with col_trend:
             st.markdown("#### 📈 Evolución Histórica de Dimensiones Críticas de Entrada (Trendline Analysis)")
