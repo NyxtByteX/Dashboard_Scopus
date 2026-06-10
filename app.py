@@ -11,15 +11,15 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilo CSS Avanzado (Alineación Perfecta y Simetría Visual)
+# Estilo CSS Avanzado (Corrección de Alineación, Centrado y Simetría Cohesiva)
 st.markdown("""
     <style>
         /* Fondo general oscuro y tipografía limpia */
         .reportview-container, .main { background: #0B0E14; }
         body { color: #E6EDF3; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
         
-        /* Títulos con acentos de color modernos */
-        h1, h2, h3, h4 { color: #00CED1 !important; font-weight: 600 !important; }
+        /* Títulos principales */
+        h1, h2, h3 { color: #00CED1 !important; font-weight: 600 !important; }
         
         /* Contenedores de Tarjetas KPI (Estilo Geckoboard) */
         .kpi-container {
@@ -47,22 +47,26 @@ st.markdown("""
             border-bottom: 1px solid #30363D;
         }
 
-        /* Glosarios con centrado vertical matemático y altura consistente con los gráficos */
-        .glossary-wrapper {
+        /* Contenedor Flexbox para forzar que el gráfico y el texto compartan el mismo centro vertical */
+        .grid-align-container {
             display: flex;
-            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            height: 340px; /* Sincronizado exactamente con la altura asignada a Plotly */
+            height: 100%;
+            min-height: 380px;
         }
         
+        /* Glosarios con tamaño controlado y padding estandarizado */
         .chart-glossary {
             background-color: #161B22;
-            padding: 22px;
+            padding: 24px;
             border-radius: 8px;
             border: 1px solid #30363D;
-            font-size: 0.88rem;
+            font-size: 0.9rem;
             color: #C9D1D9;
             line-height: 1.6;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         /* Tarjetas de Papers (Top Papers) */
@@ -170,7 +174,7 @@ def main():
     ])
 
     # =========================================================================
-    # PESTAÑA 1: DASHBOARD DE CONTROL CON CENTRADO Y ALINEACIÓN PERFECTA
+    # PESTAÑA 1: DASHBOARD DE CONTROL CON MITADES PERFECTAS Y CENTRADO COMPLETO
     # =========================================================================
     with tab1:
         # 1. FILA DE TARJETAS KPI SUPERIORES
@@ -200,24 +204,26 @@ def main():
 
         st.markdown("### 🧠 Análisis de Palabras Clave y Métricas Técnicas")
         
-        # --- BLOQUE 1: DENSIDAD DE CONCEPTOS (Columnas simétricas y centradas) ---
-        col_g1_izq, col_g1_der = st.columns([1, 1])
+        # --- BLOQUE 1: DENSIDAD DE CONCEPTOS ---
+        col_g1_izq, col_g1_der = st.columns([1, 1], gap="medium")
         
         with col_g1_izq:
-            st.markdown("#### Densidad de Conceptos de Riesgo en la Literatura")
             conceptos = ['churn', 'risk', 'accuracy', 'credit', 'transaction', 'banking', 'neural']
             conteos = [df_filtrado['Abstract_Clean'].str.contains(c).sum() for c in conceptos]
             df_conceptos = pd.DataFrame({'Concepto': [c.upper() for c in conceptos], 'Frecuencia': conteos}).sort_values(by='Frecuencia', ascending=True)
             
             fig_words = px.bar(df_conceptos, x='Frecuencia', y='Concepto', orientation='h', template='plotly_dark', color='Frecuencia', color_continuous_scale=['#FF1493', "#00CED1"])
-            fig_words.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=0, r=0, t=10, b=0), height=340)
+            fig_words.update_layout(
+                title={'text': "<b>Densidad de Conceptos de Riesgo en la Literatura</b>", 'y':0.95, 'x':0.0, 'xanchor': 'left', 'yanchor': 'top', 'font': {'size': 16, 'color': '#00CED1'}},
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=60, b=10), height=380
+            )
             st.plotly_chart(fig_words, use_container_width=True)
             
         with col_g1_der:
             st.markdown("""
-            <div class="glossary-wrapper">
+            <div class="grid-align-container">
                 <div class="chart-glossary">
-                    <h5 style="color: #00CED1 !important; margin-top: 0; margin-bottom: 10px;">💡 Glosario de Conceptos de Riesgo</h5>
+                    <h5 style="color: #00CED1 !important; margin-top: 0; margin-bottom: 10px; font-size:1.1rem;">💡 Glosario de Conceptos de Riesgo</h5>
                     <p style="margin-bottom: 8px;">Este gráfico rastrea la frecuencia con la que los modelos predictivos asocian ciertas palabras dentro de los resúmenes académicos:</p>
                     • <b>CHURN / BANKING:</b> Volumen de investigaciones enfocadas estrictamente en la pérdida y retención de clientes en banca.<br>
                     • <b>RISK / CREDIT:</b> Estudios dirigidos a mitigar el peligro crediticio o de impago financiero.<br>
@@ -229,10 +235,9 @@ def main():
         st.markdown("---")
 
         # --- BLOQUE 2: PREDOMINANCIA DE MÉTRICAS ---
-        col_g2_izq, col_g2_der = st.columns([1, 1])
+        col_g2_izq, col_g2_der = st.columns([1, 1], gap="medium")
         
         with col_g2_izq:
-            st.markdown("#### Predominancia de Métricas de Evaluación")
             metricas_data = [
                 {'Métrica': 'Accuracy', 'Papers': df_filtrado['Abstract_Clean'].str.contains('accuracy').sum()},
                 {'Métrica': 'F1-Score', 'Papers': df_filtrado['Abstract_Clean'].str.contains('f1|f-measure').sum()},
@@ -240,14 +245,17 @@ def main():
             ]
             df_m = pd.DataFrame(metricas_data).sort_values(by="Papers", ascending=True)
             fig_bar = px.bar(df_m, x="Papers", y="Métrica", orientation="h", template="plotly_dark", color="Papers", color_continuous_scale=["#FF1493", "#00CED1"])
-            fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=0, r=0, t=10, b=0), height=340)
+            fig_bar.update_layout(
+                title={'text': "<b>Predominancia de Métricas de Evaluación</b>", 'y':0.95, 'x':0.0, 'xanchor': 'left', 'yanchor': 'top', 'font': {'size': 16, 'color': '#00CED1'}},
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=60, b=10), height=380
+            )
             st.plotly_chart(fig_bar, use_container_width=True)
             
         with col_g2_der:
             st.markdown("""
-            <div class="glossary-wrapper">
+            <div class="grid-align-container">
                 <div class="chart-glossary">
-                    <h5 style="color: #FF1493 !important; margin-top: 0; margin-bottom: 10px;">🎯 Guía de Métricas de Machine Learning</h5>
+                    <h5 style="color: #FF1493 !important; margin-top: 0; margin-bottom: 10px; font-size:1.1rem;">🎯 Guía de Métricas de Machine Learning</h5>
                     <p style="margin-bottom: 8px;">Define qué criterio técnico se utilizó en la literatura para validar que el modelo realmente funciona:</p>
                     • <b>Accuracy (Exactitud):</b> Porcentaje total de predicciones correctas. Puede ser engañoso si los datos de fuga están muy desbalanceados.<br>
                     • <b>F1-Score:</b> Balance armónico entre precisión y exhaustividad. Es la métrica reina cuando hay pocos clientes que fugan frente a muchos que se quedan.<br>
@@ -259,22 +267,24 @@ def main():
         st.markdown("---")
 
         # --- BLOQUE 3: ORIGEN DE VALIDACIÓN (DONA) ---
-        col_g3_izq, col_g3_der = st.columns([1, 1])
+        col_g3_izq, col_g3_der = st.columns([1, 1], gap="medium")
         
         with col_g3_izq:
-            st.markdown("#### Origen de Validación Académica (Distribución de Literatura)")
             if len(df_filtrado) > 0:
                 fig_pie = px.pie(df_filtrado, names='Document Type', template='plotly_dark', hole=0.4, color_discrete_sequence=["#00CED1", "#FF1493", "#FFFF00", "#FF4500"])
-                fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=10, b=0), height=340, legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5))
+                fig_pie.update_layout(
+                    title={'text': "<b>Origen de Validación Académica (Distribución de Literatura)</b>", 'y':0.95, 'x':0.0, 'xanchor': 'left', 'yanchor': 'top', 'font': {'size': 16, 'color': '#00CED1'}},
+                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=10, r=10, t=60, b=50), height=380, legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5)
+                )
                 st.plotly_chart(fig_pie, use_container_width=True)
             else:
                 st.caption("Sin datos para segmentar.")
                 
         with col_g3_der:
             st.markdown("""
-            <div class="glossary-wrapper">
+            <div class="grid-align-container">
                 <div class="chart-glossary">
-                    <h5 style="color: #FFFF00 !important; margin-top: 0; margin-bottom: 10px;">📊 Tipos de Documentación Científica</h5>
+                    <h5 style="color: #FFFF00 !important; margin-top: 0; margin-bottom: 10px; font-size:1.1rem;">📊 Tipos de Documentación Científica</h5>
                     <p style="margin-bottom: 8px;">Clasificación de los documentos según la rigurosidad e intención metodológica del estudio:</p>
                     • <b>Article (Artículo de Revista):</b> Investigaciones maduras, revisadas por pares y con validaciones matemáticas extensas. Ideal para sustentar metodologías robustas.<br>
                     • <b>Conference Paper (Actas de Congresos):</b> Tecnologías de última generación expuestas rápidamente en la industria tecnológica.<br>
@@ -286,10 +296,8 @@ def main():
         st.markdown("---")
         
         # --- BLOQUE 4: GRÁFICA DE TENDENCIAS CONTINUAS ---
-        st.markdown("### 📈 Evolución Histórica de Dimensiones Críticas de Entrada")
-        
         if len(df_filtrado) > 0:
-            col_g4_izq, col_g4_der = st.columns([1, 1])
+            col_g4_izq, col_g4_der = st.columns([1, 1], gap="medium")
             
             with col_g4_izq:
                 text_comb = df_filtrado['Abstract_Clean'] + " " + df_filtrado['Title'].str.lower()
@@ -307,14 +315,17 @@ def main():
                     color_discrete_map={"📱 Transacciones e Interactividad": "#00CED1", "💳 Historial Crediticio (SBS)": "#FF1493", "👤 Datos Demográficos y Perfil": "#FFFF00"},
                     template="plotly_dark", markers=True, labels={"Cantidad de Investigaciones": "Número de Papers", "Año": "Año"}
                 )
-                fig_line.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=10, b=0), height=340, legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5))
+                fig_line.update_layout(
+                    title={'text': "<b>📈 Evolución Histórica de Dimensiones Críticas de Entrada</b>", 'y':0.95, 'x':0.0, 'xanchor': 'left', 'yanchor': 'top', 'font': {'size': 16, 'color': '#00CED1'}},
+                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=10, r=10, t=60, b=50), height=380, legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5)
+                )
                 st.plotly_chart(fig_line, use_container_width=True)
                 
             with col_g4_der:
                 st.markdown("""
-                <div class="glossary-wrapper">
+                <div class="grid-align-container">
                     <div class="chart-glossary">
-                        <h5 style="color: #00CED1 !important; margin-top: 0; margin-bottom: 10px;">📉 Análisis de Variables Críticas (Inputs)</h5>
+                        <h5 style="color: #00CED1 !important; margin-top: 0; margin-bottom: 10px; font-size:1.1rem;">📉 Análisis de Variables Críticas (Inputs)</h5>
                         <p style="margin-bottom: 8px;">Este análisis predictivo de líneas de tendencia evalúa el nivel de atención que la ciencia otorga a los pilares de comportamiento financiero:</p>
                         • <b>📱 Transacciones:</b> Mide la frecuencia de uso en ecosistemas móviles (Yape/Plin). Es el indicador más rápido para detectar desinterés.<br>
                         • <b>💳 Historial Crediticio (SBS):</b> Variaciones en el score de sobreendeudamiento externo. Detecta si el usuario busca sustitutos financieros.<br>
@@ -326,10 +337,8 @@ def main():
         st.markdown("---")
 
         # --- BLOQUE 5: DISTRIBUCIÓN DE MADUREZ ---
-        st.markdown("### 📊 Distribución de Madurez e Impacto Científico por Año")
-        
         if len(df_filtrado) > 0:
-            col_g5_izq, col_g5_der = st.columns([1, 1])
+            col_g5_izq, col_g5_der = st.columns([1, 1], gap="medium")
             
             with col_g5_izq:
                 fig_violin = px.violin(
@@ -337,14 +346,17 @@ def main():
                     template="plotly_dark", color_discrete_sequence=["#00CED1"],
                     labels={"Year": "Año de Publicación", "Cited by": "Citas Recibidas (Scopus)"}
                 )
-                fig_violin.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=10, b=0), height=340)
+                fig_violin.update_layout(
+                    title={'text': "<b>📊 Distribución de Madurez e Impacto Científico por Año</b>", 'y':0.95, 'x':0.0, 'xanchor': 'left', 'yanchor': 'top', 'font': {'size': 16, 'color': '#00CED1'}},
+                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=10, r=10, t=60, b=10), height=380
+                )
                 st.plotly_chart(fig_violin, use_container_width=True)
                 
             with col_g5_der:
                 st.markdown("""
-                <div class="glossary-wrapper">
+                <div class="grid-align-container">
                     <div class="chart-glossary">
-                        <h5 style="color: #FF1493 !important; margin-top: 0; margin-bottom: 10px;">🛡️ Interpretación de Impacto Bibliométrico</h5>
+                        <h5 style="color: #FF1493 !important; margin-top: 0; margin-bottom: 10px; font-size:1.1rem;">🛡️ Interpretación de Impacto Bibliométrico</h5>
                         <p style="margin-bottom: 8px;">Analiza la dispersión, consistencia y madurez del respaldo algorítmico a lo largo del tiempo:</p>
                         • <b>Eje Vertical (Citas Scopus):</b> Cuantifica el nivel de réplica y validación internacional que sostiene cada metodología.<br>
                         • <b>Densidad del Gráfico:</b> Las zonas más anchas muestran las tendencias donde la industria consolidó estándares homogéneos.<br>
@@ -464,7 +476,7 @@ def main():
             
             st.markdown(f"""
             <div class="detail-box">
-                <span style="color: #FF1493; font-weight: bold; font-size: 0.85rem; letter-spacing: 1px;">📋 AUDITORÍA AVANZADA DEL DOCUMENTO SELECONADO</span>
+                <span style="color: #FF1493; font-weight: bold; font-size: 0.85rem; letter-spacing: 1px;">📋 AUDITORÍA AVANZADA DEL DOCUMENTO SELECCIONADO</span>
                 <h3 style="margin-top: 10px; color: #FFF !important;">{paper_sel['Title']}</h3>
                 <p style="color: #8B949E; font-size: 0.9rem;"><b>Publicado en:</b> {paper_sel['Source title']} ({paper_sel['Year']})  |  <b>Impacto:</b> {paper_sel['Cited by']} citas.</p>
                 <hr style="border-color: #21262D;">
