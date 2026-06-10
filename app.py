@@ -88,15 +88,37 @@ def main():
         st.error("🚨 Error crítico: No se encontró la base de datos de Scopus 'scopus_PA3.csv' en la raíz.")
         return
 
-    # --- BARRA LATERAL (Filtros de Control) ---
+    # --- BARRA LATERAL REDISEÑADA (Panel de Control y Auditoría de Negocio) ---
     with st.sidebar:
         st.image("https://cdn-icons-png.flaticon.com/512/2103/2103832.png", width=50)
-        st.title("Control de Datos")
+        st.title("Auditoría de Modelos")
+        st.markdown("Configura el alcance técnico y el nivel de validación comercial para el ecosistema predictivo.")
         st.markdown("---")
         
-        busqueda = st.text_input("🔍 Concepto Clave o Algoritmo (ej. Neural, XGBoost):", "")
+        # Cambio 1: De buscador abierto a filtro estratégico por tipo de Algoritmo/Core de IA
+        categoria_ia = st.selectbox(
+            "⚙️ Arquitectura del Modelo de IA:",
+            options=["Todos los Modelos", "Redes Neuronales / Deep Learning", "Árboles de Decisión / XGBoost", "Regresión Logística / Scoring Tradicional"]
+        )
+        
+        # Mapeo lógico interno del filtro seleccionado
+        busqueda = ""
+        if categoria_ia == "Redes Neuronales / Deep Learning":
+            busqueda = "neural|deep learning"
+        elif categoria_ia == "Árboles de Decisión / XGBoost":
+            busqueda = "tree|forest|xgboost|boosting"
+        elif categoria_ia == "Regresión Logística / Scoring Tradicional":
+            busqueda = "logistic|regression|statistical"
+            
+        # Cambio 2: Traducir "Citas" a Madurez y Respaldo de la Industria
         max_citas_posibles = int(df['Cited by'].max()) if len(df) > 0 else 100
-        min_citas = st.slider("📈 Rigor del Filtro (Mínimo de Citas):", 0, max_citas_posibles, 0)
+        min_citas = st.slider(
+            "🛡️ Grado de Respaldo e Impacto en la Industria (Citas Mínimas):", 
+            min_value=0, 
+            max_value=max_citas_posibles, 
+            value=0,
+            help="Filtra las tecnologías según su nivel de réplica y éxito validado en la comunidad financiera global."
+        )
         
         st.markdown("---")
         st.caption("⚡ Powered by ChurnAI Engine v3.5 • Mercado Peruano 2026")
@@ -226,7 +248,7 @@ def main():
             st.plotly_chart(fig_line, use_container_width=True)
 
     # =========================================================================
-    # PESTAÑA 2: SIMULADOR FINANCIERO PERÚ (CONSERVADO COMPLETO)
+    # PESTAÑA 2: SIMULADOR FINANCIERO PERÚ
     # =========================================================================
     with tab2:
         st.markdown("### 🔮 Motor de Simulación de Riesgo Bancario Local")
@@ -271,7 +293,7 @@ def main():
         st.markdown("### 📚 Centro de Inteligencia y Auditoría Bibliométrica")
         st.markdown("A continuación, se exponen los papers científicos de mayor impacto que respaldan las lógicas predictivas configuradas en las secciones anteriores.")
         
-        # --- BLOQUE RESTAURADO: Las 3 tarjetas ejecutivas superiores ---
+        # Las 3 tarjetas ejecutivas superiores
         st.markdown("#### 🏆 Top 3 Papers Más Citados (Estructura de Tarjetas Advanced)")
         top_papers = df_filtrado.sort_values(by="Cited by", ascending=False).head(3)
         
@@ -294,7 +316,7 @@ def main():
 
         st.markdown("---")
         
-        # --- BLOQUE OPTIMIZADO: Data Lake Interactivo ---
+        # Data Lake Interactivo
         st.markdown("#### 🗂️ Data Lake Completo (Filtrado Inteligente e Interactividad Activa)")
         st.markdown("💡 *Haz clic en cualquier fila del cuadro inferior para auditar sus métricas de afinidad algorítmica, ver su abstract completo y analizar sus porcentajes.*")
 
