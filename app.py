@@ -10,14 +10,17 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilo CSS Avanzado (Estilo Geckoboard / Qlik Finance)
+# Estilo CSS Avanzado para simular la interfaz oscura de Geckoboard/Qlik
 st.markdown("""
     <style>
+        /* Fondo general oscuro y tipografía limpia */
         .reportview-container, .main { background: #0B0E14; }
         body { color: #E6EDF3; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        
+        /* Títulos con acentos de color modernos */
         h1, h2, h3, h4 { color: #00CED1 !important; font-weight: 600 !important; }
         
-        /* Tarjetas KPI */
+        /* Contenedores de Tarjetas KPI (Estilo Geckoboard) */
         .kpi-container {
             background-color: #161B22;
             border: 1px solid #30363D;
@@ -31,7 +34,7 @@ st.markdown("""
         .kpi-value { font-size: 2.2rem; color: #00CED1; font-weight: 700; margin: 10px 0 5px 0; }
         .kpi-sub { font-size: 0.8rem; color: #58A6FF; }
 
-        /* Banner de Estrategia */
+        /* Banner de Estrategia Central */
         .strategy-banner {
             background-color: #12161F; 
             padding: 22px; 
@@ -39,9 +42,11 @@ st.markdown("""
             border-left: 5px solid #FF1493; 
             margin-bottom: 30px;
             border-top: 1px solid #30363D;
+            border-right: 1px solid #30363D;
+            border-bottom: 1px solid #30363D;
         }
 
-        /* Tarjetas de Papers */
+        /* Tarjetas de Papers (Top Papers) */
         .paper-card {
             background-color: #161B22;
             padding: 18px;
@@ -52,7 +57,7 @@ st.markdown("""
             border-right: 1px solid #30363D;
             border-bottom: 1px solid #30363D;
         }
-        
+
         /* Contenedor de Detalle de Fila Seleccionada */
         .detail-box {
             background-color: #161B22;
@@ -96,7 +101,7 @@ def main():
         st.markdown("---")
         st.caption("⚡ Powered by ChurnAI Engine v3.5 • Mercado Peruano 2026")
 
-    # Filtrado Dinámico de Datos
+    # Filtrado Dinámico de Datos Basado en la Interacción del Usuario
     df_filtrado = df[df['Cited by'] >= min_citas].copy()
     if busqueda:
         df_filtrado = df_filtrado[df_filtrado['Abstract_Clean'].str.contains(busqueda.lower()) | 
@@ -106,7 +111,7 @@ def main():
     st.title("🔮 ChurnAI Horizon Dashboard")
     st.markdown("<p style='color:#8B949E; font-size:1.1rem; margin-top:-10px;'>Plataforma Ejecutiva de Inteligencia Analítica Aplicada al Riesgo Financiero</p>", unsafe_allow_html=True)
     
-    # --- CÁLCULO DE PESOS CONECTORES DE LA IA ---
+    # --- CÁLCULO DE PESOS PARA EL MOTOR CONECTOR ---
     menciones_trans = df_filtrado['Abstract_Clean'].str.contains('transaction|behavio|digital|channel').sum()
     menciones_score = df_filtrado['Abstract_Clean'].str.contains('credit score|credit history|credit|risk|sbs').sum()
     menciones_demo  = df_filtrado['Abstract_Clean'].str.contains('demograph|age|gender|income|status').sum()
@@ -122,19 +127,49 @@ def main():
     ])
 
     # =========================================================================
-    # PESTAÑA 1: VISUALIZACIONES PRINCIPALES E INTELIGENCIA TENDENCIAL
+    # PESTAÑA 1: DASHBOARD DE CONTROL ESTILO GECKBOARD / QLIK FINANCE
     # =========================================================================
     with tab1:
-        # 1. FILA DE TARJETAS KPI SUPERIORES
+        # 1. FILA DE TARJETAS KPI SUPERIORES (Métricas del Documento)
         col_kpi1, col_kpi2, col_kpi3, col_kpi4 = st.columns(4)
+        
         with col_kpi1:
-            st.markdown(f'<div class="kpi-container"><div class="kpi-title">Volumen de Literatura</div><div class="kpi-value">{len(df_filtrado)}</div><div class="kpi-sub">Estudios Científicos Filtrados</div></div>', unsafe_allow_html=True)
+            st.markdown(f"""
+                <div class="kpi-container">
+                    <div class="kpi-title">Volumen de Literatura</div>
+                    <div class="kpi-value">{len(df_filtrado)}</div>
+                    <div class="kpi-sub">Estudios Científicos Filtrados</div>
+                </div>
+            """, unsafe_allow_html=True)
+            
         with col_kpi2:
-            st.markdown(f'<div class="kpi-container"><div class="kpi-title">Impacto Global</div><div class="kpi-value">{df_filtrado["Cited by"].sum():,}</div><div class="kpi-sub">Citas Totales en Scopus</div></div>', unsafe_allow_html=True)
+            st.markdown(f"""
+                <div class="kpi-container">
+                    <div class="kpi-title">Impacto Global</div>
+                    <div class="kpi-value">{df_filtrado['Cited by'].sum():,}</div>
+                    <div class="kpi-sub">Citas Totales en Scopus</div>
+                </div>
+            """, unsafe_allow_html=True)
+            
         with col_kpi3:
-            st.markdown(f'<div class="kpi-container"><div class="kpi-title">Récord de Relevancia</div><div class="kpi-value">{df_filtrado["Cited by"].max() if len(df_filtrado) > 0 else 0}</div><div class="kpi-sub">Máximo de Citas en un Paper</div></div>', unsafe_allow_html=True)
+            max_citas = df_filtrado['Cited by'].max() if len(df_filtrado) > 0 else 0
+            st.markdown(f"""
+                <div class="kpi-container">
+                    <div class="kpi-title">Récord de Relevancia</div>
+                    <div class="kpi-value">{max_citas}</div>
+                    <div class="kpi-sub">Máximo de Citas en un Paper</div>
+                </div>
+            """, unsafe_allow_html=True)
+            
         with col_kpi4:
-            st.markdown(f'<div class="kpi-container"><div class="kpi-title">Densidad Científica</div><div class="kpi-value">{df_filtrado["Cited by"].mean() if len(df_filtrado) > 0 else 0:.1f}</div><div class="kpi-sub">Promedio de Citas por Registro</div></div>', unsafe_allow_html=True)
+            promedio_citas = df_filtrado['Cited by'].mean() if len(df_filtrado) > 0 else 0
+            st.markdown(f"""
+                <div class="kpi-container">
+                    <div class="kpi-title">Densidad Científica</div>
+                    <div class="kpi-value">{promedio_citas:.1f}</div>
+                    <div class="kpi-sub">Promedio de Citas por Registro</div>
+                </div>
+            """, unsafe_allow_html=True)
 
         # 2. SECCIÓN ESTRATÉGICA CENTRAL
         st.markdown(f"""
@@ -147,8 +182,9 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-        # 3. FILA DE GRÁFICOS EN PARALELO
+        # 3. FILA DE GRÁFICOS PRINCIPALES
         col_g1, col_g2 = st.columns(2)
+        
         with col_g1:
             st.markdown("#### 🎯 Predominancia de Métricas Matemáticas de Validación")
             metricas_data = [
@@ -157,6 +193,7 @@ def main():
                 {'Métrica': 'AUC-ROC', 'Papers': df_filtrado['Abstract_Clean'].str.contains('auc|roc').sum()}
             ]
             df_m = pd.DataFrame(metricas_data).sort_values(by="Papers", ascending=True)
+            
             fig_bar = px.bar(df_m, x="Papers", y="Métrica", orientation="h", template="plotly_dark", color="Papers", color_continuous_scale=["#FF1493", "#00CED1"])
             fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=10, b=10))
             st.plotly_chart(fig_bar, use_container_width=True)
@@ -169,7 +206,7 @@ def main():
 
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # 4. GRÁFICA DE LÍNEAS TEMPORAL COHESIVA
+        # 4. GRÁFICA DE TENDENCIAS CONTINUAS
         st.markdown("#### 📈 Evolución Histórica de Dimensiones Críticas de Entrada (Trendline Analysis)")
         if len(df_filtrado) > 0:
             text_comb = df_filtrado['Abstract_Clean'] + " " + df_filtrado['Title'].str.lower()
@@ -189,19 +226,20 @@ def main():
             st.plotly_chart(fig_line, use_container_width=True)
 
     # =========================================================================
-    # PESTAÑA 2: SIMULADOR FINANCIERO PERÚ (MANTENIDO INTACTO)
+    # PESTAÑA 2: SIMULADOR FINANCIERO PERÚ (CONSERVADO COMPLETO)
     # =========================================================================
     with tab2:
         st.markdown("### 🔮 Motor de Simulación de Riesgo Bancario Local")
-        st.info(f"🔗 **Estatus del Motor:** Sincronizado dinámicamente con la literatura científica actual.")
+        st.info(f"🔗 **Estatus del Motor:** Sincronizado de forma activa con {len(df_filtrado)} papers científicos indexados en Scopus. "
+                f"Distribución de coeficientes en tiempo real: 📱 Digital: {peso_trans*100:.1f}% | 💳 Crédito: {peso_score*100:.1f}% | 👤 Perfil: {peso_demo*100:.1f}%")
         
         col_sim1, col_sim2 = st.columns(2)
         with col_sim1:
             st.markdown("#### ⚙️ Entrada del Perfil Transaccional")
             banco_seleccionado = st.selectbox("Selecciona la entidad a evaluar dentro del ecosistema nacional:", ["Banco de Crédito del Perú (BCP)", "BBVA Perú", "Interbank", "Scotiabank Perú"])
-            caida_trans = st.slider("1. Contracción mensual en canales de pago móviles (%):", 0, 100, 30)
-            score_sbs = st.slider("2. Calificación del Score Crediticio interno:", 300, 850, 710)
-            portabilidad_sueldo = st.radio("3. ¿Registra alertas de portabilidad de Cuenta Sueldo?", ["No", "Sí"])
+            caida_trans = st.slider("1. Contracción mensual en canales de pago móviles (Yape / Plin, transferencias interbancarias CCE) (%):", 0, 100, 30)
+            score_sbs = st.slider("2. Calificación del Score Crediticio interno del usuario (Sentinel / SBS / Equifax):", 300, 850, 710)
+            portabilidad_sueldo = st.radio("3. ¿Registra alertas de portabilidad de Cuenta Sueldo o retiro del fondo de CTS?", ["No", "Sí"])
             
             score_ponderado = 12.0 + (caida_trans * (peso_trans * 1.2)) + ((850 - score_sbs) * (peso_score * 0.15))
             if portabilidad_sueldo == "Sí": score_ponderado += (28.0 * (peso_demo + 0.4))
@@ -210,24 +248,58 @@ def main():
         with col_sim2:
             st.markdown(f"#### 🎯 Diagnóstico Operativo ({banco_seleccionado})")
             color_alerta = "#00CED1" if riesgo_final < 50 else "#FF1493"
-            st.markdown(f"<div style='background-color: #161B22; padding: 25px; border-radius: 10px; border: 2px solid {color_alerta}; text-align: center;'><p style='color: #E6EDF3; font-size: 1.1rem; margin-bottom: 5px;'>RIESGO ESTIMADO DE ABANDONO DE CUENTA</p><h1 style='color: {color_alerta} !important; font-size: 3.8rem; margin: 0;'>{riesgo_final:.1f}%</h1></div>", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div style='background-color: #161B22; padding: 25px; border-radius: 10px; border: 2px solid {color_alerta}; text-align: center;'>
+                <p style='color: #E6EDF3; font-size: 1.1rem; margin-bottom: 5px; letter-spacing: 1px;'>RIESGO ESTIMADO DE ABANDONO DE CUENTA</p>
+                <h1 style='color: {color_alerta} !important; font-size: 3.8rem; margin: 0;'>{riesgo_final:.1f}%</h1>
+            </div>
+            """, unsafe_allow_html=True)
+            
             st.markdown("<br>", unsafe_allow_html=True)
-            if riesgo_final < 40: st.success("🟢 **Zona Segura:** El cliente se mantiene fidelizado.")
-            elif 40 <= riesgo_final < 70: st.warning("🟡 **Retención Preventiva:** Recomienda exoneración de membresía.")
-            else: st.error("🔴 **Intervención Inmediata:** Fuga inminente de haberes.")
+            st.markdown("#### 📋 Plan de Acción Táctico de Retención")
+            if riesgo_final < 40:
+                st.success("🟢 **Zona Segura:** El cliente se mantiene fidelizado. Desplegar campaigns pasivas de cross-selling (Millas LATAM Pass, Puntos BBVA o Beneficios Interbank Benefit).")
+            elif 40 <= riesgo_final < 70:
+                st.warning("🟡 **Retención Preventiva:** Descenso inusual de actividad digital. El sistema recomienda la exoneración proactiva de la membresía anual o la habilitación de una campaña preferencial de compra de deuda externa.")
+            else:
+                st.error("🔴 **Intervención Inmediata / Alerta Crítica:** Fuga inminente de haberes. El protocolo bancario exige asignar el caso de forma prioritaria a un asesor Élite de telemarketing.")
 
     # =========================================================================
-    # PESTAÑA 3: CENTRO DE DATOS E INSIGHTS (DATA LAKE INTERACTIVO)
+    # PESTAÑA 3: CENTRO DE DATOS (RESTAURADA E INTERACTIVA)
     # =========================================================================
     with tab3:
         st.markdown("### 📚 Centro de Inteligencia y Auditoría Bibliométrica")
-        st.markdown("#### 🗂️ Data Lake Completo (Filtrado Inteligente e Interactividad Activa)")
-        st.markdown("💡 *Haz clic en cualquier celda o fila del cuadro inferior para auditar sus métricas de afinidad algorítmica, ver su abstract completo y analizar sus porcentajes.*")
+        st.markdown("A continuación, se exponen los papers científicos de mayor impacto que respaldan las lógicas predictivas configuradas en las secciones anteriores.")
+        
+        # --- BLOQUE RESTAURADO: Las 3 tarjetas ejecutivas superiores ---
+        st.markdown("#### 🏆 Top 3 Papers Más Citados (Estructura de Tarjetas Advanced)")
+        top_papers = df_filtrado.sort_values(by="Cited by", ascending=False).head(3)
+        
+        if len(top_papers) > 0:
+            col_card1, col_card2, col_card3 = st.columns(3)
+            columnas_cards = [col_card1, col_card2, col_card3]
+            
+            for idx, (_, row) in enumerate(top_papers.iterrows()):
+                with columnas_cards[idx]:
+                    st.markdown(f"""
+                    <div class="paper-card">
+                        <span style="color: #8B949E; font-size: 0.8rem; font-weight: bold; text-transform: uppercase;">🔥 RELEVANCIA ALTA</span>
+                        <h4 style="margin: 8px 0; color: #FFF !important; font-size: 1rem; line-height: 1.4;">{row['Title'][:80]}...</h4>
+                        <p style="margin: 0; color: #8B949E; font-size: 0.85rem;">Año de publicación: <b>{row['Year']}</b></p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    st.metric(label="Total de Citas en Scopus", value=int(row['Cited by']))
+        else:
+            st.warning("⚠️ No se registran publicaciones que cumplan con los criterios mínimos de citas establecidos en los filtros.")
 
-        # Preparación de las columnas del Data Lake, ordenadas por Citaciones
+        st.markdown("---")
+        
+        # --- BLOQUE OPTIMIZADO: Data Lake Interactivo ---
+        st.markdown("#### 🗂️ Data Lake Completo (Filtrado Inteligente e Interactividad Activa)")
+        st.markdown("💡 *Haz clic en cualquier fila del cuadro inferior para auditar sus métricas de afinidad algorítmica, ver su abstract completo y analizar sus porcentajes.*")
+
         df_lake = df_filtrado[["Title", "Year", "Cited by", "Source title", "Abstract"]].sort_values(by="Cited by", ascending=False).reset_index(drop=True)
         
-        # Cuadro de datos interactivo con evento de selección nativo de Streamlit
         seleccion = st.dataframe(
             df_lake[["Title", "Year", "Cited by", "Source title"]],
             use_container_width=True,
@@ -242,12 +314,11 @@ def main():
             }
         )
 
-        # Bloque condicional: Si el usuario selecciona un paper, despliega la analítica avanzada en la base
+        # Si el usuario hace clic, despliega la analítica y métricas cruzadas abajo
         if len(seleccion.selection.rows) > 0:
             fila_idx = seleccion.selection.rows[0]
             paper_sel = df_lake.iloc[fila_idx]
             
-            # Cálculo de porcentajes de afinidad basados en su propio Abstract
             abs_text = paper_sel['Abstract'].lower()
             m_t = abs_text.count('transaction') + abs_text.count('behavio') + abs_text.count('digital') + abs_text.count('channel')
             m_s = abs_text.count('credit') + abs_text.count('score') + abs_text.count('risk') + abs_text.count('sbs')
@@ -267,16 +338,15 @@ def main():
             </div>
             """, unsafe_allow_html=True)
             
-            # Fila de métricas porcentuales calculadas en tiempo real para ese paper
             col_p1, col_p2, col_p3 = st.columns(3)
             with col_p1:
-                st.metric(label="📱 Afinidad Transaccional", value=f"{p_t:.1f}%", delta="Enfoque Digital" if p_t > 40 else None)
+                st.metric(label="📱 Afinidad Transaccional", value=f"{p_t:.1f}%")
             with col_p2:
-                st.metric(label="💳 Afinidad Crediticia (Riesgo)", value=f"{p_s:.1f}%", delta="Enfoque de Crédito" if p_s > 40 else None)
+                st.metric(label="💳 Afinidad Crediticia (Riesgo)", value=f"{p_s:.1f}%")
             with col_p3:
-                st.metric(label="👤 Afinidad Demográfica (Perfil)", value=f"{p_d:.1f}%", delta="Enfoque de Usuario" if p_d > 40 else None)
+                st.metric(label="👤 Afinidad Demográfica (Perfil)", value=f"{p_d:.1f}%")
         else:
             st.info("💡 **Tip Ejecutivo:** Para ver el Abstract, porcentajes de afinidad y análisis detallado de cualquier paper, haz un clic sobre su fila en el cuadro de arriba.")
 
 if __name__ == "__main__":
-    main() 
+    main()
