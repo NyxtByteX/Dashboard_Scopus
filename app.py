@@ -59,7 +59,7 @@ def main():
         colA, colB = st.columns(2)
         
         with colA:
-            st.subheader("🤖 ¿Qué "cerebros" matemáticos se usan más?")
+            st.subheader('🤖 ¿Qué "cerebros" matemáticos se usan más?')
             
             # Datos enriquecidos con explicaciones para el tooltip (hover)
             algoritmos_data = [
