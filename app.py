@@ -1,8 +1,3 @@
-Aquí tienes el código completo, limpio y listo para producción. He unificado toda la estructura e integrado el diseño de columnas asimétricas `[1.2, 0.8]` en **todos los bloques gráficos** de la Pestaña 1, dándole al dashboard una simetría visual perfecta y eliminando por completo los espacios vacíos.
-
-Copia y pega este código íntegro en tu archivo `app.py`:
-
-```python
 import streamlit as st
 import pandas as pd
 import plotly.express as px
