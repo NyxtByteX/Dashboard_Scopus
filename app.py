@@ -112,13 +112,14 @@ def main():
     # --- 1. DECLARACIÓN DE FUENTES DE DATOS ---
     nombre_archivo_base = "scopus_PA3.csv"
     archivo_subido = None
+    busqueda = ""  # Inicialización preventiva para evitar el NameError
 
     # --- 2. BARRA LATERAL (Panel de Control y Entrada Dinámica) ---
     with st.sidebar:
         st.image("https://cdn-icons-png.flaticon.com/512/2103/2103832.png", width=50)
         st.title("Auditoría de Modelos")
         
-        # Carga dinámica movida aquí para cumplir limpiamente con el Criterio 3
+        # Carga dinámica en el lateral para cumplir con el Criterio 3
         st.markdown("### 📥 Gestión de Datos")
         archivo_subido = st.file_uploader(
             "Opcional: Sube un archivo Scopus CSV externo:", 
@@ -134,9 +135,14 @@ def main():
             options=["Todos los Modelos", "Redes Neuronales / Deep Learning", "Árboles de Decisión / XGBoost", "Regresión Logística / Scoring Tradicional"]
         )
         
-        # Nota: El slider de 'min_citas' se moverá temporalmente abajo para evitar errores de carga
+        if categoria_ia == "Redes Neuronales / Deep Learning":
+            busqueda = "neural|deep learning"
+        elif categoria_ia == "Árboles de Decisión / XGBoost":
+            busqueda = "tree|forest|xgboost|boosting"
+        elif categoria_ia == "Regresión Logística / Scoring Tradicional":
+            busqueda = "logistic|regression|statistical"
 
-    # --- 3. MOTOR DE ASIGNACIÓN DEL DATAFRAME (Fuera de la Barra Lateral) ---
+    # --- 3. MOTOR DE ASIGNACIÓN DEL DATAFRAME ---
     df = None
     if archivo_subido is not None:
         try:
@@ -151,7 +157,7 @@ def main():
             st.error(f"🚨 Error crítico: No se encontró el archivo base '{nombre_archivo_base}' en la raíz del repositorio.")
             st.stop()
 
-   # --- 4. CONTINUACIÓN DE LA BARRA LATERAL (Sliders que dependen del DataFrame) ---
+    # --- 4. CONTINUACIÓN DE LA BARRA LATERAL (Sliders que dependen del DataFrame) ---
     with st.sidebar:
         max_citas_posibles = int(df['Cited by'].max()) if len(df) > 0 else 100
         min_citas = st.slider(
@@ -164,15 +170,13 @@ def main():
         st.markdown("---")
         st.caption("⚡ Powered by ChurnAI Engine v3.5 • Mercado Peruano 2026")
 
-    # =========================================================================
-    # 🔥 ¡AQUÍ ESTABA EL ERROR! - RECONEXIÓN DEL FILTRADO DINÁMICO
-    # =========================================================================
+    # --- 5. FILTRADO DINÁMICO DE DATOS ---
     df_filtrado = df[df['Cited by'] >= min_citas].copy()
     if busqueda:
         df_filtrado = df_filtrado[df_filtrado['Abstract_Clean'].str.contains(busqueda.lower()) | 
                                   df_filtrado['Title'].str.lower().str.contains(busqueda.lower())]
 
-    # --- 5. ENCABEZADO CORPORATIVO CENTRAL ---
+    # --- 6. ENCABEZADO CORPORATIVO CENTRAL ---
     st.title("🔮 ChurnAI Horizon Dashboard")
     st.markdown("<p style='color:#8B949E; font-size:1.1rem; margin-top:-10px;'>Plataforma Ejecutiva de Inteligencia Analítica Aplicada al Riesgo Financiero</p>", unsafe_allow_html=True)
     
@@ -181,7 +185,7 @@ def main():
     else:
         st.info(f"ℹ️ Datos activos: Consumiendo de manera directa desde el repositorio (`{nombre_archivo_base}`).")
     
-    # --- 6. CÁLCULO DE PESOS PARA EL MOTOR CONECTOR ---
+    # --- 7. CÁLCULO DE PESOS PARA EL MOTOR CONECTOR ---
     menciones_trans = df_filtrado['Abstract_Clean'].str.contains('transaction|behavio|digital|channel').sum()
     menciones_score = df_filtrado['Abstract_Clean'].str.contains('credit score|credit history|credit|risk|sbs').sum()
     menciones_demo  = df_filtrado['Abstract_Clean'].str.contains('demograph|age|gender|income|status').sum()
@@ -214,7 +218,7 @@ def main():
             promedio_citas = df_filtrado['Cited by'].mean() if len(df_filtrado) > 0 else 0
             st.markdown(f"""<div class="kpi-container"><div class="kpi-title">Densidad Científica</div><div class="kpi-value">{promedio_citas:.1f}</div><div class="kpi-sub">Promedio de Citas por Registro</div></div>""", unsafe_allow_html=True)
 
-    # 2. SECCIÓN ESTRATÉGICA CENTRAL (CUMPLE CRITERIO 1 DE LA RÚBRICA)
+   # 2. SECCIÓN ESTRATÉGICA CENTRAL (CUMPLE CRITERIO 1 DE LA RÚBRICA)
         st.markdown(f"""
         <div class="strategy-banner">
             <h4 style='color: #FF1493; margin-top:0; margin-bottom:8px;'>📌 PREGUNTA DE INVESTIGACIÓN Y ENFOQUE ESTRATÉGICO</h4>
@@ -224,13 +228,13 @@ def main():
             </p>
             <h5 style='color: #00CED1; margin-top:0; margin-bottom:6px;'>🔑 Estructura de Búsqueda Académica en Scopus (4 Keywords Extraídas):</h5>
             <p style='color: #C9D1D9; font-size: 0.93rem; margin-bottom:10px; line-height:1.4;'>
-                • <b>"Machine learning":</b> Define el núcleo tecnológico y los algoritmos predictivos analizados[cite: 2].<br>
-                • <b>"Churn prediction":</b> Establece el objetivo matemático y el fenómeno comercial a resolver[cite: 2].<br>
-                • <b>"Banking":</b> Restringe la exploración científica directamente al sector de la industria bancaria[cite: 2].<br>
-                • <b>"Customer retention":</b> Delimita la finalidad operativa y las estrategias de mitigación de riesgo[cite: 2].
+                • <b>"Machine learning":</b> Define el núcleo tecnológico y los algoritmos predictivos analizados.<br>
+                • <b>"Churn prediction":</b> Establece el objetivo matemático y el fenómeno comercial a resolver.<br>
+                • <b>"Banking":</b> Restringe la exploración científica directamente al sector de la industria bancaria.<br>
+                • <b>"Customer retention":</b> Delimita la finalidad operativa y las estrategias de mitigación de riesgo.
             </p>
             <p style='color: #8B949E; font-size: 0.85rem; margin:0; font-family: monospace;'>
-                <b>Sintaxis de búsqueda:</b> TITLE-ABS-KEY("Machine learning" AND "Churn prediction" AND "Banking" AND "Customer retention")[cite: 2]
+                <b>Sintaxis de búsqueda:</b> TITLE-ABS-KEY("Machine learning" AND "Churn prediction" AND "Banking" AND "Customer retention")
             </p>
         </div>
         """, unsafe_allow_html=True)
