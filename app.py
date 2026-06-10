@@ -151,7 +151,7 @@ def main():
         "📚 Centro de Datos e Insights"
     ])
 
-# =========================================================================
+    # =========================================================================
     # PESTAÑA 1: DASHBOARD DE CONTROL ESTILO GECKBOARD / QLIK FINANCE
     # =========================================================================
     with tab1:
@@ -180,7 +180,7 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-        # 3. NUEVA DISTRIBUCIÓN - FILA A: DOS GRÁFICOS DE BARRAS SIMÉTRICOS
+        # 3. FILA A: DOS GRÁFICOS DE BARRAS SIMÉTRICOS (2 por línea)
         col_barras1, col_barras2 = st.columns(2)
         
         with col_barras1:
@@ -207,7 +207,7 @@ def main():
 
         st.markdown("---")
 
-        # 4. NUEVA DISTRIBUCIÓN - FILA B: ORIGEN DE VALIDACIÓN (CENTRALIZADO Abajo)
+        # 4. FILA B: ORIGEN DE VALIDACIÓN (Dona Centralizada en su propia línea)
         col_pie_izq, col_pie_centro, col_pie_der = st.columns([0.5, 1, 0.5])
         with col_pie_centro:
             st.markdown("<h4 style='text-align: center;'>🔬 Origen de Validación Académica (Distribución de Literatura)</h4>", unsafe_allow_html=True)
@@ -221,7 +221,7 @@ def main():
         st.markdown("<br><br>", unsafe_allow_html=True)
         st.markdown("---")
         
-        # 5. GRÁFICA DE TENDENCIAS CONTINUAS (A ancho completo, una por línea)
+        # 5. GRÁFICA DE TENDENCIAS CONTINUAS (A ancho completo e interacción individualizada)
         st.markdown("#### 📈 Evolución Histórica de Dimensiones Críticas de Entrada (Trendline Analysis)")
         if len(df_filtrado) > 0:
             text_comb = df_filtrado['Abstract_Clean'] + " " + df_filtrado['Title'].str.lower()
@@ -248,31 +248,16 @@ def main():
                 markers=True,
                 labels={"Cantidad de Investigaciones": "Número de Papers Publicados", "Año": "Línea de Tiempo (Años)"}
             )
-fig_line = px.line(
-                df_melted, 
-                x="Año", 
-                y="Cantidad de Investigaciones", 
-                color="Dimensión Crítica",
-                color_discrete_map={
-                    "📱 Transacciones e Interactividad": "#00CED1", 
-                    "💳 Historial Crediticio (SBS)": "#FF1493", 
-                    "👤 Datos Demográficos y Perfil": "#FFFF00"
-                },
-                template="plotly_dark", 
-                markers=True,
-                labels={"Cantidad de Investigaciones": "Número de Papers Publicados", "Año": "Línea de Tiempo (Años)"}
-            )
             
-            # Ajuste de Interacción Individual ("closest") y posición de Leyenda
             fig_line.update_layout(
                 paper_bgcolor='rgba(0,0,0,0)', 
                 plot_bgcolor='rgba(0,0,0,0)', 
-                hovermode="closest",  # El secreto: muestra solo el punto exacto seleccionado
+                hovermode="closest",  # Foco en un solo punto al interactuar
                 margin=dict(l=10, r=10, t=30, b=20),
                 legend=dict(
-                    orientation="h",       # Leyenda horizontal
+                    orientation="h",
                     yanchor="top",
-                    y=-0.18,               # Movida abajo del gráfico para que no tape nada
+                    y=-0.18,          # Leyenda recolocada abajo para limpieza total
                     xanchor="center",
                     x=0.5
                 )
@@ -281,7 +266,7 @@ fig_line = px.line(
             
         st.markdown("---")
 
-        # 6. DISTRIBUCIÓN DE MADUREZ (A ancho completo, una por línea)
+        # 6. DISTRIBUCIÓN DE MADUREZ (A ancho completo abajo)
         st.markdown("#### 📊 Distribución de Madurez e Impacto Científico por Año")
         if len(df_filtrado) > 0:
             fig_violin = px.violin(
@@ -343,12 +328,11 @@ fig_line = px.line(
                 st.error("🔴 **Intervención Inmediata / Alerta Crítica:** Fuga inminente de haberes. El protocolo bancario exige asignar el caso de forma prioritaria a un asesor Élite de telemarketing.")
 
     # =========================================================================
-    # PESTAÑA 3: CENTRO DE DATOS (RESTAURADA, INTERACTIVA Y CON ENLACES)
+    # PESTAÑA 3: CENTRO DE DATOS
     # =========================================================================
     with tab3:
         st.markdown("### 📚 Centro de Inteligencia y Auditoría Bibliométrica")
         
-        # NUEVO ACCORDEÓN: Inspector de Calidad de Metadata Global (Asegura puntos en rúbrica)
         with st.expander("🔍 Inspeccionar Atributos de Calidad del Dataset Completo"):
             col_m1, col_m2, col_m3 = st.columns(3)
             col_m1.metric("Journals Únicos Mapeados", df_filtrado['Source title'].nunique())
@@ -357,7 +341,6 @@ fig_line = px.line(
         
         st.markdown("---")
         
-        # Las 3 tarjetas ejecutivas superiores
         st.markdown("#### 🏆 Top 3 Papers Más Citados (Estructura de Tarjetas Advanced)")
         top_papers = df_filtrado.sort_values(by="Cited by", ascending=False).head(3)
         
@@ -380,7 +363,6 @@ fig_line = px.line(
 
         st.markdown("---")
         
-        # Data Lake Interactivo con Enlaces Activos a Google Scholar
         st.markdown("#### 🗂️ Data Lake Completo (Filtrado Inteligente e Interactividad Activa)")
         st.markdown("💡 *Haz clic en cualquier fila para auditar detalles, o presiona el icono de enlace en la columna de la derecha para abrir el artículo original.*")
 
@@ -401,7 +383,6 @@ fig_line = px.line(
             }
         )
 
-        # Si el usuario hace clic, despliega la analítica y métricas cruzadas abajo
         if len(seleccion.selection.rows) > 0:
             fila_idx = seleccion.selection.rows[0]
             paper_sel = df_lake.iloc[fila_idx]
