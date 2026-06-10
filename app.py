@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 
 # --- 1. CONFIGURACIÓN DEL ENTORNO EMPRESARIAL ---
 st.set_page_config(
-    page_title="ChurnAI Analytics Hub", 
+    page_title="ChurnAI Analytics Hub - Perú", 
     page_icon="🔮", 
     layout="wide", 
     initial_sidebar_state="expanded"
@@ -48,7 +48,7 @@ def main():
         min_citas = st.slider("📈 Mínimo de citas del paper:", 0, int(df['Cited by'].max()), 0)
         
         st.markdown("---")
-        st.caption("🔒 ChurnAI Enterprise v2.5. Periodo Operativo 2025-2026.")
+        st.caption("🔒 ChurnAI Enterprise v2.6. Mercado Peruano 2025-2026.")
 
     # Filtros de la base de datos
     df_filtrado = df[df['Cited by'] >= min_citas]
@@ -58,14 +58,14 @@ def main():
 
     # --- ENCABEZADO CORPORATIVO ---
     st.title("🔮 ChurnAI Analytics Hub")
-    st.subheader("Plataforma Financiera de Onboarding y Simulación Predictiva")
+    st.subheader("Plataforma Financiera de Onboarding y Simulación Predictiva adaptada a Banca Peruana")
     
     st.markdown("""
     <div style='background-color: #161B22; padding: 20px; border-radius: 8px; border-left: 5px solid #FF1493; margin-bottom: 25px;'>
-        <h4 style='color: #FF1493; margin-top:0;'>📌 ESTRATEGIA CENTRAL DE INVESTIGACIÓN (2025-2026)</h4>
+        <h4 style='color: #FF1493; margin-top:0;'>📌 ESTRATEGIA CENTRAL DE INVESTIGACIÓN (PERÚ 2025-2026)</h4>
         <p style='color: #E6EDF3; font-size: 1.05rem; line-height: 1.6;'>
             <b>¿Cómo optimiza el uso de machine learning la predicción de la fuga de clientes (customer churn) en el sector bancario?</b><br>
-            La optimización se logra al procesar patrones transaccionales complejos en tiempo real. Los algoritmos de Machine Learning detectan anomalías de comportamiento antes de que el cliente finalice la baja, permitiendo ejecutar acciones de retención de manera automatizada y quirúrgica.
+            La optimización se logra al procesar patrones transaccionales complejos en tiempo real. En el mercado peruano, los algoritmos de Machine Learning detectan anomalías de comportamiento (como la reducción de uso de billeteras digitales o migración de haberes) antes de que el cliente finalice la baja, permitiendo ejecutar acciones de retención de manera automatizada y quirúrgica.
         </p>
         <p style='color: #8B949E; font-size: 0.85rem; margin-bottom: 0;'>
             <b>Keywords:</b> Machine learning • Customer churn • Banking • Prediction
@@ -76,7 +76,7 @@ def main():
     # --- PESTAÑAS OPERATIVAS ---
     tab1, tab2, tab3 = st.tabs([
         "📊 Métricas y Variables de la Industria", 
-        "🔮 Simulador de Proyección de Riesgo", 
+        "🔮 Simulador de Proyección de Riesgo (Banca Perú)", 
         "📚 Repositorio Scopus Inteligente"
     ])
 
@@ -103,7 +103,7 @@ def main():
             with st.expander("📖 Guía de Interpretación"):
                 st.write("**¿Qué significa?** Revela los estándares matemáticos preferidos por la ciencia de datos para validar modelos bancarios.")
                 st.write("**¿Qué representa?** El área de cobertura del mapa de radar.")
-                st.write("**¿Cómo se lee este gráfico?** Entre más lejano esté el vértice del centro, mayor es la adopción de esa métrica en soluciones reales de Churn.")
+                st.write("**¿Cómo se lee esta sección?** Entre más lejano esté el vértice del centro, mayor es la adopción de esa métrica en soluciones reales de Churn.")
 
         with colD:
             st.markdown("### 🧩 Variables Predictoras")
@@ -122,36 +122,42 @@ def main():
             with st.expander("📖 Guía de Interpretación"):
                 st.write("**¿Qué significa?** Identifica las categorías de datos del cliente con mayor peso analítico dentro del algoritmo.")
                 st.write("**¿Qué representa?** Los bloques esenciales de la ingeniería de variables financieras.")
-                st.write("**¿Cómo se lee este gráfico?** El tamaño de los rectángulos es proporcional a su impacto predictivo; cuadros grandes equivalen a variables críticas de comportamiento.")
+                st.write("**¿Cómo se lee esta sección?** El tamaño de los rectángulos es proporcional a su impacto predictivo; cuadros grandes equivalen a variables críticas de comportamiento.")
 
     # =========================================================================
-    # PESTAÑA 2: NUEVA FUNCIÓN DE PROYECTO / SIMULADOR DE ESCENARIOS
+    # PESTAÑA 2: SIMULADOR DE ESCENARIOS - BANCOS PERUANOS
     # =========================================================================
     with tab2:
-        st.markdown("### 🔮 Módulo de Proyección de Riesgo de Churn")
-        st.markdown("Interactúa con los controles simulando el perfil transaccional de un cliente para proyectar su probabilidad de abandono según las tendencias de Machine Learning extraídas de la literatura.")
+        st.markdown("### 🔮 Módulo de Proyección de Riesgo de Churn en el Contexto Peruano")
+        st.markdown("Modifica las variables operativas del cliente para proyectar su probabilidad de abandono según las métricas de Machine Learning aplicadas a la banca local.")
         
         col_sim1, col_sim2 = st.columns([1, 1])
         
         with col_sim1:
             st.markdown("#### ⚙️ Entrada de Datos del Cliente (Variables Predictoras)")
-            # Preguntas e inputs dinámicos que simulan la consulta de un analista
-            caida_trans = st.slider("1. ¿Qué porcentaje de reducción transaccional presenta en el último mes? (%)", 0, 100, 25)
-            score_banco = st.slider("2. ¿Cuál es el Score Crediticio interno del cliente?", 300, 850, 680)
-            quejas_activas = st.radio("3. ¿El cliente ha registrado reclamos formales en los últimos 30 días?", ["No", "Sí"])
             
-            # Algoritmo interno de proyección simulado (Lógica de scoring financiero)
-            riesgo_calculado = 15.0
-            riesgo_calculado += (caida_trans * 0.55)
-            riesgo_calculado += ((850 - score_banco) * 0.08)
-            if quejas_activas == "Sí":
-                riesgo_calculado += 20.0
+            # Contextualización de entidades bancarias del Perú
+            banco_seleccionado = st.selectbox(
+                "Selecciona la entidad del ecosistema financiero local a evaluar:",
+                ["Banco de Crédito del Perú (BCP)", "BBVA Perú", "Interbank", "Scotiabank Perú"]
+            )
+            
+            # Variables críticas reales del mercado peruano
+            caida_trans = st.slider("1. ¿Qué porcentaje de reducción presenta en su actividad digital (Yape / Plin, transferencias interbancarias) en el último mes? (%)", 0, 100, 25)
+            score_infocorp = st.slider("2. ¿Cuál es el Score Crediticio interno del cliente (ej. Sentinel / SBS / Equifax)?", 300, 850, 680)
+            portabilidad_sueldo = st.radio("3. ¿El sistema detecta solicitudes pendientes de portabilidad de Cuenta Sueldo o retiro total de CTS?", ["No", "Sí"])
+            
+            # Algoritmo interno de proyección simulado ajustado al perfil local
+            riesgo_calculado = 10.0
+            riesgo_calculado += (caida_trans * 0.60)
+            riesgo_calculado += ((850 - score_infocorp) * 0.07)
+            if portabilidad_sueldo == "Sí":
+                riesgo_calculado += 25.0
             riesgo_final = min(max(riesgo_calculado, 0.0), 100.0)
 
         with col_sim2:
-            st.markdown("#### 🎯 Proyección de Fuga y Respuesta del Modelo")
+            st.markdown(f"#### 🎯 Proyección de Fuga para {banco_seleccionado}")
             
-            # Paleta bicolor dinámica según el nivel de alerta
             color_alerta = "#00CED1" if riesgo_final < 50 else "#FF1493"
             
             st.markdown(f"""
@@ -162,27 +168,35 @@ def main():
             """, unsafe_allow_html=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### 📋 Plan de Acción Recomendado")
+            st.markdown("#### 📋 Plan de Acción Operativo (SBS / Regulación Local)")
+            
+            # Acciones adaptadas a las estrategias reales de retención en Perú
             if riesgo_final < 40:
-                st.success("🟢 **Riesgo Bajo / Estable:** El comportamiento entra en rangos tolerables. Mantener estrategias estándar de fidelización digital.")
+                st.success(f"🟢 **Riesgo Bajo / Estable:** El cliente mantiene alta fidelidad. Mantener el envío de campañas cruzadas estándar (ej. Beneficios con Millas Benefit/LATAM Pass o promociones exclusivas en la App del banco).")
             elif 40 <= riesgo_final < 70:
-                st.warning("🟡 **Alerta Moderada / Retención Preventiva:** El sistema detecta anomalías transaccionales. Emitir automáticamente una oferta de tasa preferencial en canales móviles.")
+                st.warning(f"🟡 **Alerta Moderada / Retención Preventiva:** Descenso marcado en transacciones. El motor de ML sugiere la exoneración automatizada de la membresía de la Tarjeta de Crédito o la oferta de una tasa preferencial para Préstamo Personal.")
             else:
-                st.error("🔴 **Alerta Crítica / Intervención Inmediata:** Alta probabilidad de deserción. El protocolo de Machine Learning sugiere el contacto directo de un ejecutivo de cuenta en menos de 24 horas.")
+                st.error(f"🔴 **Alerta Crítica / Intervención Inmediata:** Alta probabilidad de fuga de fondos. Prioridad máxima para el equipo de Telemarketing del banco. El protocolo exige asignación directa a un ejecutivo elite para contraofertar beneficios en la Cuenta Sueldo en menos de 12 horas.")
+
+        with st.expander("Base teórica: Explicación de las variables en Perú"):
+            st.markdown("""
+            * **Yape / Plin / Transferencias:** Al ser herramientas de uso diario en Perú, un decaimiento en esta variable es el predictor de corto plazo más potente (indica pérdida de transaccionalidad).
+            * **Sentinel / Equifax / SBS:** Si el cliente baja su score crediticio externo o incrementa sus deudas en otros bancos, el modelo detecta que está buscando financiamiento afuera, aumentando el riesgo de abandono definitivo.
+            * **Cuenta Sueldo / CTS:** El núcleo de la rentabilidad del cliente minorista peruano. Si hay un intento de portabilidad de haberes, la probabilidad de Churn se dispara de forma crítica.
+            """)
 
         with st.expander("📖 Guía de Interpretación de esta Sección"):
             st.write("**¿Qué significa?** Es una simulación práctica de cómo la ingeniería de variables optimiza la toma de decisiones predictivas en la banca.")
             st.write("**¿Qué representa?** El flujo automatizado de evaluación de riesgo que un analista bancario ejecuta usando modelos de Machine Learning.")
-            st.write("**¿Cómo se lee este gráfico?** Al modificar los sliders, la probabilidad se recalcula instantáneamente; un resultado superior al 50% cambia el indicador a Rosa Neón, marcando una alerta operativa inmediata.")
+            st.write("**¿Cómo se lee esta sección?** Al modificar los sliders, la probabilidad se recalcula instantáneamente; un resultado superior al 50% cambia el indicador a Rosa Neón, marcando una alerta operativa inmediata.")
 
     # =========================================================================
-    # PESTAÑA 3: NUEVA FUNCIÓN INTERACTIVA DE SCOPUS (A LA CARTA)
+    # PESTAÑA 3: REPOSITORIO INTERACTIVO SCOPUS (A LA CARTA)
     # =========================================================================
     with tab3:
         st.markdown("### 📚 Repositorio Científico Interactivo Scopus (2025-2026)")
         st.markdown("Configura tu vista preferida seleccionando únicamente los metadatos analíticos que deseas que aparezcan en el reporte en pantalla.")
         
-        # Selector dinámico de columnas solicitado por el usuario
         columnas_disponibles = {
             "Título del Paper": "Title",
             "Año de Publicación": "Year",
@@ -197,17 +211,15 @@ def main():
             default=["Título del Paper", "Año de Publicación", "Citas Recibidas", "Enlace de Verificación"]
         )
         
-        # Mapear las columnas seleccionadas en español a los nombres del DataFrame original
         columnas_mapeadas = [columnas_disponibles[col] for col in columnas_seleccionadas_es]
         
         if columnas_mapeadas:
             df_mostrar = df_filtrado[columnas_mapeadas].copy()
             
-            # Configuración dinámica de columnas de Streamlit
             config_columnas = {}
             if "Title" in columnas_mapeadas: config_columnas["Title"] = st.column_config.TextColumn("Título del Estudio Científico")
             if "Year" in columnas_mapeadas: config_columnas["Year"] = st.column_config.NumberColumn("Año", format="%d")
-            if "Cited by" in columnas_mapeadas: config_columnas["Cited by"] = st.column_config.ProgressColumn("Citas", format="%d", min_value=0, max_value=int(df['Cited by'].max()))
+            if "Cited by" in columnas_mapeadas: config_columnas["Cited by"] = st.column_config.ProgressColumn("Citas", format="%d", min_value=0, max_value=int(df['Cited by'].max())),
             if "Source title" in columnas_mapeadas: config_columnas["Source title"] = st.column_config.TextColumn("Revista / Source Title")
             if "Link" in columnas_mapeadas: config_columnas["Link"] = st.column_config.LinkColumn("Enlace Oficial Scopus")
             
@@ -223,7 +235,7 @@ def main():
         with st.expander("📖 Guía de Interpretación de esta Sección"):
             st.write("**¿Qué significa?** Es la base de datos científica estructurada que audita y da soporte de ingeniería a los módulos interactivos anteriores.")
             st.write("**¿Qué representa?** El compendio bibliométrico indexado de la literatura científica internacional sobre Churn bancario.")
-            st.write("**¿Cómo se lee este gráfico?** Puedes usar el buscador interactivo para agregar o quitar columnas de metadatos en tiempo real, u ordenar las filas haciendo clic directamente sobre las cabeceras de la tabla.")
+            st.write("**¿Cómo se lee esta sección?** Puedes usar el buscador interactivo para agregar o quitar columnas de metadatos en tiempo real, u ordenar las filas haciendo clic directamente sobre las cabeceras de la tabla.")
 
 if __name__ == "__main__":
     main()
