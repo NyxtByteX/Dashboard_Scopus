@@ -218,25 +218,46 @@ def main():
             promedio_citas = df_filtrado['Cited by'].mean() if len(df_filtrado) > 0 else 0
             st.markdown(f"""<div class="kpi-container"><div class="kpi-title">Densidad Científica</div><div class="kpi-value">{promedio_citas:.1f}</div><div class="kpi-sub">Promedio de Citas por Registro</div></div>""", unsafe_allow_html=True)
 
-   # 2. SECCIÓN ESTRATÉGICA CENTRAL (CUMPLE CRITERIO 1 DE LA RÚBRICA)
+  # 2. SECCIÓN ESTRATÉGICA CENTRAL 
         st.markdown(f"""
         <div class="strategy-banner">
             <h4 style='color: #FF1493; margin-top:0; margin-bottom:8px;'>📌 PREGUNTA DE INVESTIGACIÓN Y ENFOQUE ESTRATÉGICO</h4>
-            <p style='color: #E6EDF3; font-size: 1.05rem; line-height: 1.5; margin-bottom:15px;'>
+            <p style='color: #E6EDF3; font-size: 1.05rem; line-height: 1.5; margin:0;'>
                 <b>¿Cómo optimiza el uso de machine learning la predicción de la fuga de clientes en el sector bancario?</b><br>
                 La optimización se ejecuta mediante el análisis dinámico de comportamiento. Al interconectar la Big Data de Scopus con disparadores transaccionales locales (Yape, Plin, CTS y variaciones del Score SBS), la IA automatiza la toma de decisiones críticas para congelar la fuga de capitales antes de que el cliente abandone la entidad.
             </p>
-            <h5 style='color: #00CED1; margin-top:0; margin-bottom:6px;'>🔑 Estructura de Búsqueda Académica en Scopus (4 Keywords Extraídas):</h5>
-            <p style='color: #C9D1D9; font-size: 0.93rem; margin-bottom:10px; line-height:1.4;'>
-                • <b>"Machine learning":</b> Define el núcleo tecnológico y los algoritmos predictivos analizados.<br>
-                • <b>"Churn prediction":</b> Establece el objetivo matemático y el fenómeno comercial a resolver.<br>
-                • <b>"Banking":</b> Restringe la exploración científica directamente al sector de la industria bancaria.<br>
-                • <b>"Customer retention":</b> Delimita la finalidad operativa y las estrategias de mitigación de riesgo.
-            </p>
-            <p style='color: #8B949E; font-size: 0.85rem; margin:0; font-family: monospace;'>
-                <b>Sintaxis de búsqueda:</b> TITLE-ABS-KEY("Machine learning" AND "Churn prediction" AND "Banking" AND "Customer retention")
-            </p>
         </div>
+        """, unsafe_allow_html=True)
+
+        # Contenedor de Palabras Clave en formato de Tarjetas Visuales (Scannable)
+        st.markdown("<h5 style='color: #00CED1; margin-top:0; margin-bottom:15px;'>🔑 Estructura de Búsqueda Académica en Scopus (4 Keywords):</h5>", unsafe_allow_html=True)
+        
+        col_key1, col_key2, col_key3, col_key4 = st.columns(4)
+        with col_key1:
+            st.markdown("""<div style='background-color: #161B22; border: 1px solid #30363D; padding: 15px; border-radius: 8px; text-align: center; min-height: 110px;'>
+                <div style='font-size: 1.1rem; color: #FF1493; font-weight: bold; margin-bottom: 5px;'>\"Machine learning\"</div>
+                <div style='font-size: 0.8rem; color: #8B949E;'>Núcleo tecnológico y algoritmos predictivos.</div>
+            </div>""", unsafe_allow_html=True)
+        with col_key2:
+            st.markdown("""<div style='background-color: #161B22; border: 1px solid #30363D; padding: 15px; border-radius: 8px; text-align: center; min-height: 110px;'>
+                <div style='font-size: 1.1rem; color: #FF1493; font-weight: bold; margin-bottom: 5px;'>\"Churn prediction\"</div>
+                <div style='font-size: 0.8rem; color: #8B949E;'>Objetivo matemático y fenómeno a resolver.</div>
+            </div>""", unsafe_allow_html=True)
+        with col_key3:
+            st.markdown("""<div style='background-color: #161B22; border: 1px solid #30363D; padding: 15px; border-radius: 8px; text-align: center; min-height: 110px;'>
+                <div style='font-size: 1.1rem; color: #FF1493; font-weight: bold; margin-bottom: 5px;'>\"Banking\"</div>
+                <div style='font-size: 0.8rem; color: #8B949E;'>Sector de la industria delimitado.</div>
+            </div>""", unsafe_allow_html=True)
+        with col_key4:
+            st.markdown("""<div style='background-color: #161B22; border: 1px solid #30363D; padding: 15px; border-radius: 8px; text-align: center; min-height: 110px;'>
+                <div style='font-size: 1.1rem; color: #FF1493; font-weight: bold; margin-bottom: 5px;'>\"Customer retention\"</div>
+                <div style='font-size: 0.8rem; color: #8B949E;'>Finalidad operativa y mitigación de riesgo.</div>
+            </div>""", unsafe_allow_html=True)
+
+        st.markdown("""
+            <p style='color: #8B949E; font-size: 0.85rem; margin-top: 15px; margin-bottom: 25px; font-family: monospace;'>
+                <b>Sintaxis lógica aplicada:</b> TITLE-ABS-KEY("Machine learning" AND "Churn prediction" AND "Banking" AND "Customer retention")
+            </p>
         """, unsafe_allow_html=True)
         
         # --- BLOQUE 1: DENSIDAD DE CONCEPTOS ---
