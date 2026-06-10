@@ -2,126 +2,174 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from collections import Counter
+import re
 
-# 1. Configuración de página a pantalla completa
-st.set_page_config(page_title="AI Bank Churn Analytics", page_icon="🏦", layout="wide")
+# 1. CONFIGURACIÓN: Modo ultra ancho y elegante
+st.set_page_config(page_title="AI Churn Intelligence", page_icon="🌐", layout="wide", initial_sidebar_state="expanded")
 
-# 2. Carga automática de datos
+# 2. MOTOR DE DATOS: Carga y extracción avanzada
 @st.cache_data
-def load_data():
+def load_and_process_data():
     df = pd.read_csv('scopus_PA3.csv')
     df['Cited by'] = df['Cited by'].fillna(0).astype(int)
     df['Year'] = df['Year'].fillna(2025).astype(int)
-    # Acortamos nombres largos para que los gráficos se vean elegantes
     df['Revista Corta'] = df['Source title'].str[:35] + '...'
+    
+    # MAGIA: Extraer países de la columna 'Affiliations'
+    def extract_countries(affil_text):
+        if pd.isna(affil_text):
+            return []
+        # Scopus suele poner el país al final de cada afiliación separada por comas
+        afiliaciones = str(affil_text).split(';')
+        paises = [af.split(',')[-1].strip() for af in afiliaciones if len(af.split(',')) > 0]
+        return paises
+
+    df['Countries'] = df['Affiliations'].apply(extract_countries)
     return df
 
 def main():
     try:
-        df = load_data()
+        df = load_and_process_data()
     except Exception:
-        st.error("🚨 Error: No se encontró el archivo scopus_PA3.csv en GitHub.")
+        st.error("🚨 Error crítico: No se encontró la base de datos scopus_PA3.csv.")
         return
 
-    # --- BARRA LATERAL: CENTRO DE CONTROL ---
-    st.sidebar.image("https://cdn-icons-png.flaticon.com/512/2830/2830284.png", width=80)
-    st.sidebar.title("🕹️ Filtros de Negocio")
-    st.sidebar.markdown("Explora las soluciones científicas:")
+    # --- DISEÑO DEL PANEL LATERAL (MODERNO Y LIMPIO) ---
+    with st.sidebar:
+        st.image("https://cdn-icons-png.flaticon.com/512/2830/2830284.png", width=60)
+        st.title("⚙️ Centro de Mando")
+        st.markdown("---")
+        
+        # Filtros minimalistas
+        busqueda = st.text_input("🔍 Búsqueda libre (Ej. Credit, Behaviour):", placeholder="Escribe aquí...")
+        
+        modelos = ["Cualquier Algoritmo", "Random Forest", "Neural Network", "XGBoost", "SVM", "SHAP"]
+        modelo_seleccionado = st.selectbox("🤖 Tecnología de IA:", modelos)
+        
+        st.markdown("---")
+        st.caption("💡 Tip: Usa los filtros para que los gráficos se actualicen en tiempo real.")
 
-    # FILTRO 1: Buscador Libre (Más útil que los años)
-    busqueda = st.sidebar.text_input("🔍 Buscar término (ej. Credit Card, Behaviour):", "")
-
-    # FILTRO 2: Selector de Algoritmo (Útil para el banco)
-    modelos = ["Todos", "Random Forest", "Neural Network", "SVM", "XGBoost", "Decision Tree", "Deep Learning", "SHAP"]
-    modelo_seleccionado = st.sidebar.selectbox("🤖 Filtrar por Tecnología IA:", modelos)
-
-    # Lógica de filtrado en vivo
+    # --- LÓGICA DE FILTRADO ---
     df_filtrado = df.copy()
     if busqueda:
-        df_filtrado = df_filtrado[df_filtrado['Abstract'].fillna('').str.contains(busqueda, case=False) | 
-                                  df_filtrado['Title'].fillna('').str.contains(busqueda, case=False)]
-    
-    if modelo_seleccionado != "Todos":
-        df_filtrado = df_filtrado[df_filtrado['Abstract'].fillna('').str.contains(modelo_seleccionado, case=False) | 
-                                  df_filtrado['Author Keywords'].fillna('').str.contains(modelo_seleccionado, case=False)]
+        filtro_txt = busqueda.lower()
+        df_filtrado = df_filtrado[df_filtrado['Abstract'].fillna('').str.lower().str.contains(filtro_txt) | 
+                                  df_filtrado['Title'].fillna('').str.lower().str.contains(filtro_txt)]
+    if modelo_seleccionado != "Cualquier Algoritmo":
+        filtro_mod = modelo_seleccionado.lower()
+        df_filtrado = df_filtrado[df_filtrado['Abstract'].fillna('').str.lower().str.contains(filtro_mod) | 
+                                  df_filtrado['Author Keywords'].fillna('').str.lower().str.contains(filtro_mod)]
 
-    # --- ENCABEZADO ---
-    st.title("🏦 Dashboard Interactivo: Mitigación de Fuga de Clientes con IA")
-    st.markdown("*Herramienta de exploración visual para equipos de Riesgo y Analítica Bancaria.*")
+    # --- ENCABEZADO ELEGANTE ---
+    st.title("🌐 Hub Global de Inteligencia: Retención de Clientes con IA")
+    st.markdown("""
+    <p style='font-size: 1.1rem; color: #666;'>
+    Explora el panorama científico mundial sobre modelos predictivos antifuga. Descubre de dónde provienen las soluciones y qué tecnologías dominan el sector financiero.
+    </p>
+    """, unsafe_allow_html=True)
 
     if df_filtrado.empty:
-        st.warning("⚠️ Tus filtros son muy específicos y no hay resultados. Prueba seleccionando 'Todos'.")
+        st.warning("No hay investigaciones que coincidan con estos filtros. Intenta ser más general.")
         return
 
-    # --- KPIs DE IMPACTO ---
+    # --- METRICAS ESTILO FINANCIERO (MÁS LIMPIAS) ---
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("📚 Papers Encontrados", len(df_filtrado))
-    c2.metric("⭐ Impacto (Citas Totales)", df_filtrado['Cited by'].sum())
-    # Calculamos cuántos autores trabajaron en estas soluciones
-    total_autores = df_filtrado['Authors'].str.count(';').sum() + len(df_filtrado)
-    c3.metric("🧠 Mentes Investigando", int(total_autores))
-    c4.metric("🏢 Revistas Únicas", df_filtrado['Source title'].nunique())
+    c1.metric("📄 Investigaciones Analizadas", len(df_filtrado))
+    c2.metric("🎯 Nivel de Impacto (Citas)", df_filtrado['Cited by'].sum())
+    
+    # Extraer todos los países únicos del dataframe filtrado
+    todos_paises = [pais for sublist in df_filtrado['Countries'] for pais in sublist]
+    c3.metric("🌍 Países Involucrados", len(set(todos_paises)) if todos_paises else 0)
+    c4.metric("🏢 Fuentes Únicas", df_filtrado['Source title'].nunique())
+    
+    st.markdown("---")
 
-    st.divider()
+    # =====================================================================
+    # SECCIÓN 1: EL MAPA DEL MUNDO (EL EFECTO "GUAU")
+    # =====================================================================
+    st.subheader("🌍 Ecosistema Global de Innovación")
+    
+    if todos_paises:
+        # Contar cuántos papers por país
+        conteo_paises = pd.DataFrame.from_dict(Counter(todos_paises), orient='index').reset_index()
+        conteo_paises.columns = ['País', 'Investigaciones']
+        
+        # Crear mapa coroplético
+        fig_map = px.choropleth(
+            conteo_paises, 
+            locations="País", 
+            locationmode="country names",
+            color="Investigaciones",
+            hover_name="País",
+            color_continuous_scale=px.colors.sequential.Blues,
+            title="Calor Geográfico: ¿Dónde se está creando la tecnología?"
+        )
+        fig_map.update_layout(geo=dict(showframe=False, showcoastlines=True, projection_type='equirectangular'), margin=dict(l=0, r=0, t=40, b=0))
+        st.plotly_chart(fig_map, use_container_width=True)
+        
+        with st.expander("📖 ¿Cómo interpretar este mapa?"):
+            st.info("Los colores más oscuros indican los países que lideran la investigación en IA para la retención de clientes bancarios. Si el banco busca alianzas tecnológicas o consultorías de vanguardia, debe mirar hacia los hubs marcados en azul oscuro.")
+    else:
+        st.info("No hay datos geográficos disponibles para esta selección.")
 
-    # --- ZONA DE GRÁFICOS ULTRA INTERACTIVOS ---
-    st.markdown("### 🔭 Ecosistema Analítico (Haz clic en los gráficos)")
+    # =====================================================================
+    # SECCIÓN 2: TECNOLOGÍA E IMPACTO (GRÁFICOS MODERNOS)
+    # =====================================================================
+    st.markdown("<br>", unsafe_allow_html=True) # Espacio en blanco
     colA, colB = st.columns(2)
 
     with colA:
-        # GRÁFICO 1: Sunburst Chart (Gráfico Solar)
-        # Es visualmente increíble. El usuario hace clic en un año y se expanden las revistas.
-        df_filtrado['Conteo'] = 1
-        fig_sunburst = px.sunburst(
-            df_filtrado, 
-            path=['Year', 'Revista Corta'], 
-            values='Conteo',
-            color='Cited by', 
-            color_continuous_scale='Teal',
-            title="Distribución de Publicaciones (Click para Zoom)"
-        )
-        fig_sunburst.update_traces(textinfo="label+percent parent")
-        st.plotly_chart(fig_sunburst, use_container_width=True)
+        st.subheader("🧬 ADN de los Algoritmos")
+        if 'Author Keywords' in df_filtrado.columns:
+            kws = df_filtrado['Author Keywords'].dropna().str.split(';')
+            lista_kws = [k.strip().title() for sub in kws for k in sub if len(k.strip()) > 3]
+            conteo_kws = pd.DataFrame(Counter(lista_kws).most_common(15), columns=['Tecnología', 'Uso'])
+            
+            fig_bar = px.bar(
+                conteo_kws.sort_values('Uso', ascending=True), 
+                x='Uso', y='Tecnología', orientation='h',
+                color='Uso', color_continuous_scale='Teal',
+                title="Top Tecnologías Mencionadas por Científicos"
+            )
+            fig_bar.update_layout(xaxis_title="Frecuencia de aparición", yaxis_title="")
+            st.plotly_chart(fig_bar, use_container_width=True)
+            
+            with st.expander("📖 ¿Cómo interpretar este gráfico?"):
+                st.info("Muestra las palabras clave y algoritmos más utilizados por los investigadores. Las barras más largas representan el 'estándar de la industria' actual. Si 'Random Forest' o 'Machine Learning' lideran, es porque son los métodos más rentables y probados.")
 
     with colB:
-        # GRÁFICO 2: Dispersión con Distribuciones Marginales (Estilo Dark Mode)
-        # Se ve extremadamente profesional y "hacker".
-        fig_scatter = px.scatter(
-            df_filtrado, x="Year", y="Cited by", color="Revista Corta",
-            hover_name="Title", size_max=15, marginal_y="violin", marginal_x="box",
-            title="Distribución de Impacto Científico por Año",
-            template="plotly_dark" # Tema oscuro que lo hace resaltar
+        st.subheader("🔥 Burbujas de Autoridad Científica")
+        fig_bubble = px.scatter(
+            df_filtrado, x="Year", y="Cited by", size="Cited by", color="Revista Corta",
+            hover_name="Title", size_max=40, 
+            title="Impacto por Año (Tamaño = N° de Citas)",
+            template="plotly_white"
         )
-        fig_scatter.update_traces(marker=dict(size=12, opacity=0.8, line=dict(width=1, color='white')))
-        fig_scatter.update_layout(xaxis_type='category') # Evita que el año salga como "2025.5"
-        st.plotly_chart(fig_scatter, use_container_width=True)
-
-    # --- GRÁFICO 3: TREEMAP DE CONCEPTOS ---
-    st.markdown("### 🧩 Mapa Interactivo de Algoritmos y Conceptos")
-    st.markdown("Los bloques más grandes son las tecnologías con mayor tendencia en el sector bancario.")
-    if 'Author Keywords' in df_filtrado.columns:
-        kws = df_filtrado['Author Keywords'].dropna().str.split(';')
-        lista_kws = [k.strip().title() for sub in kws for k in sub if len(k.strip()) > 3]
-        conteo_kws = pd.DataFrame(Counter(lista_kws).most_common(25), columns=['Concepto', 'Frecuencia'])
+        fig_bubble.update_layout(xaxis=dict(tickmode='linear', dtick=1)) # Años enteros
+        st.plotly_chart(fig_bubble, use_container_width=True)
         
-        fig_tree = px.treemap(
-            conteo_kws, path=['Concepto'], values='Frecuencia',
-            color='Frecuencia', color_continuous_scale='Plasma'
-        )
-        fig_tree.update_traces(textinfo="label+value")
-        st.plotly_chart(fig_tree, use_container_width=True)
+        with st.expander("📖 ¿Cómo interpretar este gráfico?"):
+            st.info("Cada burbuja es una investigación. **El eje vertical y el tamaño** indican qué tan respetado (citado) es el documento. Si ves una burbuja gigante, significa que ese paper contiene un modelo o caso de éxito que el banco DEBERÍA leer obligatoriamente.")
 
-    # --- EXPLORADOR DE DATOS FINAL ---
+    # =====================================================================
+    # SECCIÓN 3: TABLA DE DATOS INTERACTIVA
+    # =====================================================================
     st.divider()
-    st.markdown("### 🗂️ Catálogo de Soluciones")
+    st.subheader("🗂️ Directorio de Soluciones Antifuga")
+    st.markdown("Selecciona y ordena los papers para profundizar en sus hallazgos.")
+    
+    df_mostrar = df_filtrado[['Title', 'Year', 'Cited by', 'Revista Corta', 'Link']].copy()
+    
     st.dataframe(
-        df_filtrado[['Title', 'Year', 'Cited by', 'Revista Corta', 'Link']], 
+        df_mostrar.sort_values('Cited by', ascending=False), 
         use_container_width=True, 
         hide_index=True,
         column_config={
+            "Title": st.column_config.TextColumn("Título de la Investigación", width="large"),
             "Year": st.column_config.NumberColumn("Año", format="%d"),
-            "Cited by": st.column_config.NumberColumn("Citas"),
-            "Link": st.column_config.LinkColumn("Leer Paper")
+            "Cited by": st.column_config.NumberColumn("Citas (Autoridad)"),
+            "Revista Corta": st.column_config.TextColumn("Publicado en"),
+            "Link": st.column_config.LinkColumn("Documento Original")
         }
     )
 
