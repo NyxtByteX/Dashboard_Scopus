@@ -32,6 +32,8 @@ st.markdown("""
 @st.cache_data
 def load_and_process_data():
     df = pd.read_csv('scopus_PA3.csv')
+    df['Title'] = df['Title'].fillna('Untitled Paper')
+    df['Source title'] = df['Source title'].fillna('Unknown Source')
     df['Cited by'] = df['Cited by'].fillna(0).astype(int)
     df['Year'] = df['Year'].fillna(2025).astype(int)
     df['Abstract_Clean'] = df['Abstract'].fillna('').str.lower()
@@ -58,7 +60,7 @@ def main():
         st.caption("⚡ Powered by ChurnAI Engine v3.5 • Mercado Peruano 2026")
 
     # Filtrado Dinámico Global
-    df_filtrado = df[df['Cited by'] >= min_citas]
+    df_filtrado = df[df['Cited by'] >= min_citas].copy()
     if busqueda:
         df_filtrado = df_filtrado[df_filtrado['Abstract_Clean'].str.contains(busqueda.lower()) | 
                                   df_filtrado['Title'].str.lower().str.contains(busqueda.lower())]
@@ -110,7 +112,6 @@ def main():
             ]
             df_m = pd.DataFrame(metricas_data).sort_values(by="Papers", ascending=True)
             
-            # Reemplazo del Radar por un Horizontal Bar Chart limpio
             fig_bar = px.bar(df_m, x="Papers", y="Métrica", orientation="h", template="plotly_dark", color="Papers", color_continuous_scale=["#FF1493", "#00CED1"])
             fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False)
             st.plotly_chart(fig_bar, use_container_width=True)
@@ -119,7 +120,6 @@ def main():
 
         with col_g2:
             st.markdown("#### 📈 Distribución Temporal de Citaciones Científicas")
-            # Reemplazo del Boxplot por un Violin Explorer con Scatter integrado
             fig_violin = px.violin(df_filtrado, x="Year", y="Cited by", box=True, points="all", template="plotly_dark", color_discrete_sequence=["#00CED1"])
             fig_violin.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_violin, use_container_width=True)
@@ -128,22 +128,71 @@ def main():
 
         st.markdown("---")
         
-        # SEGUNDO BLOQUE REEMPLAZO: El Scatter Bubble Intelligence Map (Reemplaza al Treemap)
+        # REEMPLAZO OPTIMIZADO: MAPA DE RELACIÓN Y RELEVANCIA DE VARIABLES (INDIVIDUAL Y VECTORIZADO)
         st.markdown("#### 🧩 Mapa de Relación y Relevancia de Variables Financieras (Scatter Intelligence Map)")
+        st.markdown("Cada burbuja representa un **estudio científico individual**. Su posición mapea el año de publicación frente a su dimensión predictiva principal; el tamaño de la burbuja es proporcional a su impacto global (citas).")
         
-        features_plot_data = []
-        for year in sorted(df_filtrado['Year'].unique()):
-            df_year = df_filtrado[df_filtrado['Year'] == year]
-            features_plot_data.append({'Año': year, 'Categoría': 'Transacciones e Interactividad', 'Menciones': df_year['Abstract_Clean'].str.contains('transaction|behavio|digital|channel').sum()})
-            features_plot_data.append({'Año': year, 'Categoría': 'Historial Crediticio', 'Menciones': df_year['Abstract_Clean'].str.contains('credit score|credit history|credit|risk|sbs').sum()})
-            features_plot_data.append({'Año': year, 'Categoría': 'Datos Demográficos', 'Menciones': df_year['Abstract_Clean'].str.contains('demograph|age|gender|income|status').sum()})
-        
-        df_fp = pd.DataFrame(features_plot_data)
-        
-        fig_scatter = px.scatter(df_fp, x="Año", y="Menciones", size="Menciones", color="Categoría", color_discrete_sequence=["#FF1493", "#00CED1", "#FFFF00"], template="plotly_dark", hover_name="Categoría")
-        fig_scatter.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-        st.plotly_chart(fig_scatter, use_container_width=True)
-        st.success("💡 **Insight automático:** Mueve los filtros de la barra izquierda; el mapa de burbujas recalculará de forma instantánea el volumen e impacto temporal de cada variable predictora.")
+        if len(df_filtrado) > 0:
+            # Procesamiento de texto de manera súper veloz y segura (Vectorizado)
+            text_comb = df_filtrado['Abstract_Clean'] + " " + df_filtrado['Title'].str.lower()
+            
+            c_trans = text_comb.str.count('transaction|behavio|digital|channel|yape|plin')
+            c_score = text_comb.str.count('credit|score|history|risk|sbs|infocorp')
+            c_demo = text_comb.str.count('demograph|age|gender|income|status|sueldo')
+            
+            counts_df = pd.DataFrame({'trans': c_trans, 'score': c_score, 'demo': c_demo})
+            max_val = counts_df.max(axis=1)
+            
+            # Clasificación inteligente basada en la métrica máxima dominante
+            def calcular_dominante(row):
+                if row['max_v'] == 0: return "⚙️ Enfoque General / Algorítmico"
+                elif row['trans'] == row['max_v']: return "📱 Transacciones e Interactividad"
+                elif row['score'] == row['max_v']: return "💳 Historial Crediticio (SBS)"
+                else: return "👤 Datos Demográficos y Perfil"
+                
+            counts_df['max_v'] = max_val
+            dominant_series = counts_df.apply(calcular_dominante, axis=1)
+            
+            df_pf = pd.DataFrame({
+                'Título': df_filtrado['Title'],
+                'Año': df_filtrado['Year'],
+                'Citas': df_filtrado['Cited by'],
+                'Revista': df_filtrado['Source title'],
+                'Variable Dominante': dominant_series,
+                'Tamaño_Visual': df_filtrado['Cited by'] + 12
+            })
+            
+            color_map = {
+                "📱 Transacciones e Interactividad": "#00CED1",
+                "💳 Historial Crediticio (SBS)": "#FF1493",
+                "👤 Datos Demográficos y Perfil": "#FFFF00",
+                "⚙️ Enfoque General / Algorítmico": "#8B949E"
+            }
+            
+            fig_scatter = px.scatter(
+                df_pf, x="Año", y="Variable Dominante", size="Tamaño_Visual", color="Variable Dominante",
+                color_discrete_map=color_map, template="plotly_dark", hover_name="Título",
+                custom_data=["Citas", "Revista"]
+            )
+            
+            fig_scatter.update_traces(
+                hovertemplate="<b>📈 %{hovertext}</b><br><br>" +
+                              "📅 <b>Año de Publicación:</b> %{x}<br>" +
+                              "🔥 <b>Citas Globales (Scopus):</b> %{customdata[0]}<br>" +
+                              "📚 <b>Revista Indexada:</b> %{customdata[1]}<extra></extra>"
+            )
+            
+            fig_scatter.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                xaxis=dict(title="Línea de Tiempo de la Literatura", gridcolor="#21262D", tickmode="linear"),
+                yaxis=dict(title="Dimensión Crítica del Modelo", gridcolor="#21262D", autorange="reversed"),
+                showlegend=False, height=450
+            )
+            
+            st.plotly_chart(fig_scatter, use_container_width=True)
+            st.success("💡 **Insight Automático:** Explora el mapa interactivo pasando el cursor sobre las burbujas. Los cúmulos densos revelan hacia dónde se está moviendo la arquitectura de riesgos en la banca actual.")
+        else:
+            st.warning("⚠️ Filtros muy restrictivos. No hay suficientes registros científicos para trazar el Scatter Map.")
 
     # =========================================================================
     # PESTAÑA 2: SIMULADOR FINANCIERO PERÚ (100% CONECTADO)
@@ -151,7 +200,6 @@ def main():
     with tab2:
         st.markdown("### 🔮 Motor de Simulación de Riesgo Bancario Local")
         
-        # Notificación con estilo SaaS de la interconexión de datos
         st.info(f"🔗 **Estatus del Motor:** Sincronizado de forma activa con {len(df_filtrado)} papers científicos indexados en Scopus. "
                 f"Distribución de coeficientes en tiempo real: 📱 Digital: {peso_trans*100:.1f}% | 💳 Crédito: {peso_score*100:.1f}% | 👤 Perfil: {peso_demo*100:.1f}%")
         
@@ -161,12 +209,10 @@ def main():
             st.markdown("#### ⚙️ Entrada del Perfil Transaccional")
             banco_seleccionado = st.selectbox("Selecciona la entidad a evaluar dentro del ecosistema nacional:", ["Banco de Crédito del Perú (BCP)", "BBVA Perú", "Interbank", "Scotiabank Perú"])
             
-            # Parámetros adaptados a la infraestructura peruana
             caida_trans = st.slider("1. Contracción mensual en canales de pago móviles (Yape / Plin, transferencias interbancarias CCE) (%):", 0, 100, 30)
             score_sbs = st.slider("2. Calificación del Score Crediticio interno del usuario (Sentinel / SBS / Equifax):", 300, 850, 710)
             portabilidad_sueldo = st.radio("3. ¿Registra alertas de portabilidad de Cuenta Sueldo o retiro del fondo de CTS?", ["No", "Sí"])
             
-            # Algoritmo de scoring dinámico e interconectado
             score_ponderado = 12.0
             score_ponderado += (caida_trans * (peso_trans * 1.2))
             score_ponderado += ((850 - score_sbs) * (peso_score * 0.15))
@@ -208,7 +254,6 @@ def main():
         
         st.markdown("#### 🏆 Top 3 Papers Más Citados (Estructura de Tarjetas Avanzadas)")
         
-        # Extracción dinámica de las tarjetas tipo Spotify/Netflix
         top_papers = df_filtrado.sort_values(by="Cited by", ascending=False).head(3)
         
         if len(top_papers) > 0:
@@ -229,84 +274,19 @@ def main():
             st.warning("⚠️ No se registran publicaciones que cumplan con los criterios mínimos de citas establecidos en los filtros.")
 
         st.markdown("---")
+        st.markdown("#### 🗂️ Data Lake Completo (Filtrado Inteligente)")
         
-        # =========================================================================
-        # REEMPLAZO OPTIMIZADO: MAPA DE RELACIÓN Y RELEVANCIA DE VARIABLES (INDIVIDUAL)
-        # =========================================================================
-        st.markdown("#### 🧩 Mapa de Relación y Relevancia de Variables Financieras (Scatter Intelligence Map)")
-        st.markdown("Cada burbuja representa un **estudio científico individual**. Su posición mapea el año de publicación frente a su dimensión predictiva principal; el tamaño de la burbuja es proporcional a su impacto global (citas).")
-        
-        if len(df_filtrado) > 0:
-            paper_features = []
-            
-            # Clasificación analítica individual por cada registro del Data Lake
-            for _, row in df_filtrado.iterrows():
-                txt = row['Abstract_Clean'] + " " + str(row['Title']).lower()
-                c_trans = txt.count('transaction') + txt.count('behavio') + txt.count('digital') + txt.count('channel') + txt.count('yape') + txt.count('plin')
-                c_score = txt.count('credit') + txt.count('score') + txt.count('history') + txt.count('risk') + txt.count('sbs') + txt.count('infocorp')
-                c_demo = txt.count('demograph') + txt.count('age') + txt.count('gender') + txt.count('income') + txt.count('status') + txt.count('sueldo')
-                
-                max_val = max(c_trans, c_score, c_demo)
-                if max_val == 0:
-                    dominant = "⚙️ Enfoque General / Algorítmico"
-                elif max_val == c_trans:
-                    dominant = "📱 Transacciones e Interactividad"
-                elif max_val == c_score:
-                    dominant = "💳 Historial Crediticio (SBS)"
-                else:
-                    dominant = "👤 Datos Demográficos y Perfil"
-                    
-                paper_features.append({
-                    'Título': row['Title'],
-                    'Año': row['Year'],
-                    'Citas': int(row['Cited by']),
-                    'Revista': row['Source title'],
-                    'Variable Dominante': dominant,
-                    'Tamaño_Visual': int(row['Cited by']) + 12  # Baseline dinámico para que papers con 0 citas sean interactivos
-                })
-            
-            df_pf = pd.DataFrame(paper_features)
-            
-            # Mapeo estricto de la paleta de colores Fintech (Look de Startup)
-            color_map = {
-                "📱 Transacciones e Interactividad": "#00CED1",       # Azul Cian
-                "💳 Historial Crediticio (SBS)": "#FF1493",          # Rosa Neón
-                "👤 Datos Demográficos y Perfil": "#FFFF00",         # Amarillo Neón
-                "⚙️ Enfoque General / Algorítmico": "#8B949E"         # Gris Metálico
+        df_tabla = df_filtrado[["Title", "Year", "Cited by", "Source title"]].copy()
+        st.dataframe(
+            df_tabla.sort_values(by="Cited by", ascending=False),
+            use_container_width=True, hide_index=True,
+            column_config={
+                "Title": st.column_config.TextColumn("Título del Estudio Científico"),
+                "Year": st.column_config.NumberColumn("Año", format="%d"),
+                "Cited by": st.column_config.NumberColumn("Citas"),
+                "Source title": st.column_config.TextColumn("Revista Científica")
             }
-            
-            # Construcción de la matriz temporal de burbujas
-            fig_scatter = px.scatter(
-                df_pf, 
-                x="Año", 
-                y="Variable Dominante", 
-                size="Tamaño_Visual", 
-                color="Variable Dominante",
-                color_discrete_map=color_map,
-                template="plotly_dark", 
-                hover_name="Título",
-                custom_data=["Citas", "Revista"]
-            )
-            
-            # Formateo de Hover con Inteligencia de Producto (Elimina etiquetas por defecto aburridas)
-            fig_scatter.update_traces(
-                hovertemplate="<b>📈 %{hovertext}</b><br><br>" +
-                              "📅 <b>Año de Publicación:</b> %{x}<br>" +
-                              "🔥 <b>Citas Globales (Scopus):</b> %{customdata[0]}<br>" +
-                              "📚 <b>Revista Indexada:</b> %{customdata[1]}<extra></extra>"
-            )
-            
-            # Estilización del layout para conservar la estética Dark Mode Estricta
-            fig_scatter.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)', 
-                plot_bgcolor='rgba(0,0,0,0)',
-                xaxis=dict(title="Línea de Tiempo de la Literatura", gridcolor="#21262D", tickmode="linear"),
-                yaxis=dict(title="Dimensión Crítica del Modelo", gridcolor="#21262D", autorange="reversed"),
-                showlegend=False,
-                height=450
-            )
-            
-            st.plotly_chart(fig_scatter, use_container_width=True)
-            st.success("💡 **Insight Automático:** Explora el mapa interactivo pasando el cursor sobre las burbujas. Los cúmulos densos revelan hacia dónde se está moviendo la arquitectura de riesgos en la banca actual.")
-        else:
-            st.warning("⚠️ Filtros muy restrictivos. No hay suficientes registros científicos para trazar el Scatter Map.")
+        )
+
+if __name__ == "__main__":
+    main()
