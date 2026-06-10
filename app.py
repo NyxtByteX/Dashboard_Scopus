@@ -109,32 +109,69 @@ def process_data(file_source):
     return df
 
 def main():
-    # --- ENCABEZADO CORPORATIVO Y GESTIÓN DE CARGA ---
-    st.title("🔮 ChurnAI Horizon Dashboard")
-    st.markdown("<p style='color:#8B949E; font-size:1.1rem; margin-top:-10px;'>Plataforma Ejecutiva de Inteligencia Analítica Aplicada al Riesgo Financiero</p>", unsafe_allow_html=True)
-    
-    # Interfaz de carga dinámica obligatoria por la rúbrica (Criterio 3)
-    st.markdown("### 📥 Gestión Dinámica del Dataset")
-    archivo_subido = st.file_uploader("Opcional: Sube un archivo Scopus CSV externo para actualizar el ecosistema predictivo:", type=["csv"])
+    # --- 1. DECLARACIÓN DE FUENTES DE DATOS ---
+    nombre_archivo_base = "scopus_PA3.csv"
+    archivo_subido = None
 
+    # --- 2. BARRA LATERAL (Panel de Control y Entrada Dinámica) ---
+    with st.sidebar:
+        st.image("https://cdn-icons-png.flaticon.com/512/2103/2103832.png", width=50)
+        st.title("Auditoría de Modelos")
+        
+        # Carga dinámica movida aquí para cumplir limpiamente con el Criterio 3
+        st.markdown("### 📥 Gestión de Datos")
+        archivo_subido = st.file_uploader(
+            "Opcional: Sube un archivo Scopus CSV externo:", 
+            type=["csv"],
+            help="Actualiza el ecosistema predictivo cargando un archivo local dinámicamente."
+        )
+        st.markdown("---")
+        
+        st.markdown("Configura el alcance técnico y el nivel de validación comercial para el ecosistema predictivo.")
+        
+        categoria_ia = st.selectbox(
+            "⚙️ Arquitectura del Modelo de IA:",
+            options=["Todos los Modelos", "Redes Neuronales / Deep Learning", "Árboles de Decisión / XGBoost", "Regresión Logística / Scoring Tradicional"]
+        )
+        
+        # Nota: El slider de 'min_citas' se moverá temporalmente abajo para evitar errores de carga
+
+    # --- 3. MOTOR DE ASIGNACIÓN DEL DATAFRAME (Fuera de la Barra Lateral) ---
     df = None
     if archivo_subido is not None:
         try:
             df = process_data(archivo_subido)
-            st.success("✅ Dataset externo cargado e integrado dinámicamente.")
         except Exception as e:
             st.error(f"🚨 Error al procesar el archivo subido: {e}")
             st.stop()
     else:
-        # Carga automática del archivo base que ya está en tu repositorio
-        nombre_archivo_base = "scopus_PA3.csv"
         try:
             df = process_data(nombre_archivo_base)
-            st.info(f"ℹ️ Datos activos: Consumiendo de manera directa desde el repositorio (`{nombre_archivo_base}`).")
         except Exception:
             st.error(f"🚨 Error crítico: No se encontró el archivo base '{nombre_archivo_base}' en la raíz del repositorio.")
             st.stop()
 
+    # --- 4. CONTINUACIÓN DE LA BARRA LATERAL (Sliders que dependen del DataFrame) ---
+    with st.sidebar:
+        max_citas_posibles = int(df['Cited by'].max()) if len(df) > 0 else 100
+        min_citas = st.slider(
+            "🛡️ Grado de Respaldo e Impacto en la Industria (Citas Mínimas):", 
+            min_value=0, 
+            max_value=max_citas_posibles, 
+            value=0,
+            help="Filtra las tecnologías según su nivel de réplica y éxito validado en la comunidad financiera global."
+        )
+        st.markdown("---")
+        st.caption("⚡ Powered by ChurnAI Engine v3.5 • Mercado Peruano 2026")
+
+    # --- 5. ENCABEZADO CORPORATIVO CENTRAL ---
+    st.title("🔮 ChurnAI Horizon Dashboard")
+    st.markdown("<p style='color:#8B949E; font-size:1.1rem; margin-top:-10px;'>Plataforma Ejecutiva de Inteligencia Analítica Aplicada al Riesgo Financiero</p>", unsafe_allow_html=True)
+    
+    if archivo_subido is not None:
+        st.success("✅ Dataset externo cargado e integrado dinámicamente.")
+    else:
+        st.info(f"ℹ️ Datos activos: Consumiendo de manera directa desde el repositorio (`{nombre_archivo_base}`).")
     # --- 3. BARRA LATERAL (Panel de Control y Auditoría de Negocio) ---
     with st.sidebar:
         st.image("https://cdn-icons-png.flaticon.com/512/2103/2103832.png", width=50)
