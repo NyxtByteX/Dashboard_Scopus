@@ -4,130 +4,124 @@ import plotly.express as px
 from collections import Counter
 
 # 1. Configuración de página a pantalla completa
-st.set_page_config(page_title="Bank Churn AI Explorer", page_icon="🏦", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="AI Bank Churn Analytics", page_icon="🏦", layout="wide")
 
-# 2. Carga automática del archivo (sin que el usuario haga nada)
+# 2. Carga automática de datos
 @st.cache_data
-def load_bank_data():
+def load_data():
     df = pd.read_csv('scopus_PA3.csv')
-    df['Cited by'] = df['Cited by'].fillna(0)
+    df['Cited by'] = df['Cited by'].fillna(0).astype(int)
     df['Year'] = df['Year'].fillna(2025).astype(int)
+    # Acortamos nombres largos para que los gráficos se vean elegantes
+    df['Revista Corta'] = df['Source title'].str[:35] + '...'
     return df
 
 def main():
     try:
-        df = load_bank_data()
-    except:
-        st.error("🚨 Sube tu archivo scopus_PA3.csv a GitHub primero.")
+        df = load_data()
+    except Exception:
+        st.error("🚨 Error: No se encontró el archivo scopus_PA3.csv en GitHub.")
         return
 
-    # --- BARRA LATERAL: EL CONTROL REMOTO DEL USUARIO ---
+    # --- BARRA LATERAL: CENTRO DE CONTROL ---
     st.sidebar.image("https://cdn-icons-png.flaticon.com/512/2830/2830284.png", width=80)
-    st.sidebar.title("🕹️ Panel de Control")
-    st.sidebar.markdown("Juega con los filtros para descubrir insights.")
+    st.sidebar.title("🕹️ Filtros de Negocio")
+    st.sidebar.markdown("Explora las soluciones científicas:")
 
-    # Filtro 1: Rango de años
-    min_yr, max_yr = int(df['Year'].min()), int(df['Year'].max())
-    rango_anios = st.sidebar.slider("📅 Selecciona el periodo:", min_yr, max_yr, (min_yr, max_yr))
+    # FILTRO 1: Buscador Libre (Más útil que los años)
+    busqueda = st.sidebar.text_input("🔍 Buscar término (ej. Credit Card, Behaviour):", "")
 
-    # Filtro 2: Nivel de impacto (Citas)
-    min_citas = st.sidebar.slider("🔥 Mínimo de citas del artículo:", 0, int(df['Cited by'].max()), 0)
+    # FILTRO 2: Selector de Algoritmo (Útil para el banco)
+    modelos = ["Todos", "Random Forest", "Neural Network", "SVM", "XGBoost", "Decision Tree", "Deep Learning", "SHAP"]
+    modelo_seleccionado = st.sidebar.selectbox("🤖 Filtrar por Tecnología IA:", modelos)
 
-    # Filtro 3: Buscador interactivo
-    palabra_clave = st.sidebar.text_input("🔍 Buscar tema (ej. Random Forest, SHAP):", "")
-
-    # APLICAR FILTROS
-    df_filtrado = df[(df['Year'] >= rango_anios[0]) & (df['Year'] <= rango_anios[1])]
-    df_filtrado = df_filtrado[df_filtrado['Cited by'] >= min_citas]
-    if palabra_clave:
-        df_filtrado = df_filtrado[df_filtrado['Abstract'].fillna('').str.contains(palabra_clave, case=False) | 
-                                  df_filtrado['Title'].fillna('').str.contains(palabra_clave, case=False)]
+    # Lógica de filtrado en vivo
+    df_filtrado = df.copy()
+    if busqueda:
+        df_filtrado = df_filtrado[df_filtrado['Abstract'].fillna('').str.contains(busqueda, case=False) | 
+                                  df_filtrado['Title'].fillna('').str.contains(busqueda, case=False)]
+    
+    if modelo_seleccionado != "Todos":
+        df_filtrado = df_filtrado[df_filtrado['Abstract'].fillna('').str.contains(modelo_seleccionado, case=False) | 
+                                  df_filtrado['Author Keywords'].fillna('').str.contains(modelo_seleccionado, case=False)]
 
     # --- ENCABEZADO ---
-    st.title("🏦 Explorador de IA para Mitigar Fuga de Clientes (Churn)")
-    
-    # --- KPIs VISUALES ---
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("📚 Artículos Encontrados", len(df_filtrado))
-    c2.metric("⭐ Citas Totales", int(df_filtrado['Cited by'].sum()))
-    c3.metric("🏆 Máximo de Citas en un Paper", int(df_filtrado['Cited by'].max()))
-    c4.metric("🏢 Revistas Especializadas", df_filtrado['Source title'].nunique())
-    
-    st.divider()
+    st.title("🏦 Dashboard Interactivo: Mitigación de Fuga de Clientes con IA")
+    st.markdown("*Herramienta de exploración visual para equipos de Riesgo y Analítica Bancaria.*")
 
-    # Si no hay datos tras filtrar, avisar visualmente
     if df_filtrado.empty:
-        st.warning("⚠️ No hay artículos que coincidan con tus filtros. Prueba ajustándolos en el panel izquierdo.")
+        st.warning("⚠️ Tus filtros son muy específicos y no hay resultados. Prueba seleccionando 'Todos'.")
         return
 
-    # --- FILA 1 DE GRÁFICOS: BURBUJAS Y MAPA DE PALABRAS ---
-    st.markdown("### 🔭 Panorama de la Investigación")
+    # --- KPIs DE IMPACTO ---
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("📚 Papers Encontrados", len(df_filtrado))
+    c2.metric("⭐ Impacto (Citas Totales)", df_filtrado['Cited by'].sum())
+    # Calculamos cuántos autores trabajaron en estas soluciones
+    total_autores = df_filtrado['Authors'].str.count(';').sum() + len(df_filtrado)
+    c3.metric("🧠 Mentes Investigando", int(total_autores))
+    c4.metric("🏢 Revistas Únicas", df_filtrado['Source title'].nunique())
+
+    st.divider()
+
+    # --- ZONA DE GRÁFICOS ULTRA INTERACTIVOS ---
+    st.markdown("### 🔭 Ecosistema Analítico (Haz clic en los gráficos)")
     colA, colB = st.columns(2)
 
     with colA:
-        # Gráfico 1: Treemap de Palabras Clave (Super dinámico)
-        if 'Author Keywords' in df_filtrado.columns:
-            # Procesar las palabras clave
-            kws = df_filtrado['Author Keywords'].dropna().str.split(';')
-            lista_kws = [k.strip().title() for sub in kws for k in sub]
-            conteo_kws = pd.DataFrame(Counter(lista_kws).most_common(20), columns=['Concepto', 'Frecuencia'])
-            
-            fig_tree = px.treemap(conteo_kws, path=['Concepto'], values='Frecuencia',
-                                  title="Conceptos y Algoritmos Más Estudiados (Treemap)",
-                                  color='Frecuencia', color_continuous_scale='Teal')
-            st.plotly_chart(fig_tree, use_container_width=True)
+        # GRÁFICO 1: Sunburst Chart (Gráfico Solar)
+        # Es visualmente increíble. El usuario hace clic en un año y se expanden las revistas.
+        df_filtrado['Conteo'] = 1
+        fig_sunburst = px.sunburst(
+            df_filtrado, 
+            path=['Year', 'Revista Corta'], 
+            values='Conteo',
+            color='Cited by', 
+            color_continuous_scale='Teal',
+            title="Distribución de Publicaciones (Click para Zoom)"
+        )
+        fig_sunburst.update_traces(textinfo="label+percent parent")
+        st.plotly_chart(fig_sunburst, use_container_width=True)
 
     with colB:
-        # Gráfico 2: Gráfico de Burbujas (Citas vs Año)
-        fig_bubble = px.scatter(df_filtrado, x="Year", y="Cited by", size="Cited by", color="Source title",
-                                hover_name="Title", size_max=45,
-                                title="Impacto de los Artículos (El tamaño es el nº de citas)")
+        # GRÁFICO 2: Dispersión con Distribuciones Marginales (Estilo Dark Mode)
+        # Se ve extremadamente profesional y "hacker".
+        fig_scatter = px.scatter(
+            df_filtrado, x="Year", y="Cited by", color="Revista Corta",
+            hover_name="Title", size_max=15, marginal_y="violin", marginal_x="box",
+            title="Distribución de Impacto Científico por Año",
+            template="plotly_dark" # Tema oscuro que lo hace resaltar
+        )
+        fig_scatter.update_traces(marker=dict(size=12, opacity=0.8, line=dict(width=1, color='white')))
+        fig_scatter.update_layout(xaxis_type='category') # Evita que el año salga como "2025.5"
+        st.plotly_chart(fig_scatter, use_container_width=True)
+
+    # --- GRÁFICO 3: TREEMAP DE CONCEPTOS ---
+    st.markdown("### 🧩 Mapa Interactivo de Algoritmos y Conceptos")
+    st.markdown("Los bloques más grandes son las tecnologías con mayor tendencia en el sector bancario.")
+    if 'Author Keywords' in df_filtrado.columns:
+        kws = df_filtrado['Author Keywords'].dropna().str.split(';')
+        lista_kws = [k.strip().title() for sub in kws for k in sub if len(k.strip()) > 3]
+        conteo_kws = pd.DataFrame(Counter(lista_kws).most_common(25), columns=['Concepto', 'Frecuencia'])
         
-        # Ajustamos el eje X para que los años se vean enteros (2025, 2026)
-        fig_bubble.update_layout(xaxis=dict(tickformat="d"))
-        st.plotly_chart(fig_bubble, use_container_width=True)
+        fig_tree = px.treemap(
+            conteo_kws, path=['Concepto'], values='Frecuencia',
+            color='Frecuencia', color_continuous_scale='Plasma'
+        )
+        fig_tree.update_traces(textinfo="label+value")
+        st.plotly_chart(fig_tree, use_container_width=True)
 
-    # --- FILA 2 DE GRÁFICOS: TENDENCIAS Y TOP REVISTAS ---
-    st.markdown("### 🏆 Liderazgo Científico")
-    colC, colD = st.columns([1.5, 1])
-
-    with colC:
-        # Gráfico 3: Barras Horizontales Top Papers
-        df_top = df_filtrado.sort_values('Cited by', ascending=False).head(7)
-        df_top['Título'] = df_top['Title'].str[:50] + "..."
-        fig_bar = px.bar(df_top, x='Cited by', y='Título', orientation='h', 
-                         color='Cited by', color_continuous_scale='Inferno',
-                         title="Los 7 Artículos Más Influyentes (Por Citas)",
-                         hover_data=['Authors', 'Year'])
-        fig_bar.update_layout(yaxis={'categoryorder':'total ascending'})
-        st.plotly_chart(fig_bar, use_container_width=True)
-
-    with colD:
-        # Gráfico 4: Gráfico de Anillo
-        top_revistas = df_filtrado['Source title'].value_counts().head(5).reset_index()
-        top_revistas.columns = ['Revista', 'Artículos']
-        fig_donut = px.pie(top_revistas, values='Artículos', names='Revista', hole=0.5,
-                           title="Top 5 Revistas", color_discrete_sequence=px.colors.sequential.Agal)
-        fig_donut.update_traces(textposition='inside', textinfo='percent')
-        st.plotly_chart(fig_donut, use_container_width=True)
-
-    # --- SECCIÓN INTERACTIVA FINAL: EXPLORADOR DE DATOS ---
+    # --- EXPLORADOR DE DATOS FINAL ---
     st.divider()
-    st.markdown("### 🗄️ Base de Datos Interactiva")
-    st.markdown("Haz clic en cualquier columna para ordenar los datos.")
-    
-    # Mostramos una tabla limpia y bonita
-    columnas_mostrar = ['Year', 'Title', 'Authors', 'Source title', 'Cited by', 'Link']
-    columnas_existentes = [c for c in columnas_mostrar if c in df_filtrado.columns]
-    
+    st.markdown("### 🗂️ Catálogo de Soluciones")
     st.dataframe(
-        df_filtrado[columnas_existentes],
-        use_container_width=True,
+        df_filtrado[['Title', 'Year', 'Cited by', 'Revista Corta', 'Link']], 
+        use_container_width=True, 
         hide_index=True,
         column_config={
             "Year": st.column_config.NumberColumn("Año", format="%d"),
             "Cited by": st.column_config.NumberColumn("Citas"),
-            "Link": st.column_config.LinkColumn("Enlace a Scopus")
+            "Link": st.column_config.LinkColumn("Leer Paper")
         }
     )
 
