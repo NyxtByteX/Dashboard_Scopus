@@ -151,7 +151,7 @@ def main():
             st.error(f"🚨 Error crítico: No se encontró el archivo base '{nombre_archivo_base}' en la raíz del repositorio.")
             st.stop()
 
-    # --- 4. CONTINUACIÓN DE LA BARRA LATERAL (Sliders que dependen del DataFrame) ---
+   # --- 4. CONTINUACIÓN DE LA BARRA LATERAL (Sliders que dependen del DataFrame) ---
     with st.sidebar:
         max_citas_posibles = int(df['Cited by'].max()) if len(df) > 0 else 100
         min_citas = st.slider(
@@ -164,6 +164,14 @@ def main():
         st.markdown("---")
         st.caption("⚡ Powered by ChurnAI Engine v3.5 • Mercado Peruano 2026")
 
+    # =========================================================================
+    # 🔥 ¡AQUÍ ESTABA EL ERROR! - RECONEXIÓN DEL FILTRADO DINÁMICO
+    # =========================================================================
+    df_filtrado = df[df['Cited by'] >= min_citas].copy()
+    if busqueda:
+        df_filtrado = df_filtrado[df_filtrado['Abstract_Clean'].str.contains(busqueda.lower()) | 
+                                  df_filtrado['Title'].str.lower().str.contains(busqueda.lower())]
+
     # --- 5. ENCABEZADO CORPORATIVO CENTRAL ---
     st.title("🔮 ChurnAI Horizon Dashboard")
     st.markdown("<p style='color:#8B949E; font-size:1.1rem; margin-top:-10px;'>Plataforma Ejecutiva de Inteligencia Analítica Aplicada al Riesgo Financiero</p>", unsafe_allow_html=True)
@@ -173,7 +181,7 @@ def main():
     else:
         st.info(f"ℹ️ Datos activos: Consumiendo de manera directa desde el repositorio (`{nombre_archivo_base}`).")
     
-    # --- CÁLCULO DE PESOS PARA EL MOTOR CONECTOR ---
+    # --- 6. CÁLCULO DE PESOS PARA EL MOTOR CONECTOR ---
     menciones_trans = df_filtrado['Abstract_Clean'].str.contains('transaction|behavio|digital|channel').sum()
     menciones_score = df_filtrado['Abstract_Clean'].str.contains('credit score|credit history|credit|risk|sbs').sum()
     menciones_demo  = df_filtrado['Abstract_Clean'].str.contains('demograph|age|gender|income|status').sum()
