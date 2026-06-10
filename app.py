@@ -217,11 +217,17 @@ def main():
             df_mostrar = df_filtrado[columnas_mapeadas].copy()
             
             config_columnas = {}
-            if "Title" in columnas_mapeadas: config_columnas["Title"] = st.column_config.TextColumn("Título del Estudio Científico")
-            if "Year" in columnas_mapeadas: config_columnas["Year"] = st.column_config.NumberColumn("Año", format="%d")
-            if "Cited by" in columnas_mapeadas: config_columnas["Cited by"] = st.column_config.ProgressColumn("Citas", format="%d", min_value=0, max_value=int(df['Cited by'].max())),
-            if "Source title" in columnas_mapeadas: config_columnas["Source title"] = st.column_config.TextColumn("Revista / Source Title")
-            if "Link" in columnas_mapeadas: config_columnas["Link"] = st.column_config.LinkColumn("Enlace Oficial Scopus")
+            if "Title" in columnas_mapeadas: 
+                config_columnas["Title"] = st.column_config.TextColumn("Título del Estudio Científico")
+            if "Year" in columnas_mapeadas: 
+                config_columnas["Year"] = st.column_config.NumberColumn("Año", format="%d")
+            if "Cited by" in columnas_mapeadas: 
+                # ¡Coma eliminada aquí al final!
+                config_columnas["Cited by"] = st.column_config.ProgressColumn("Citas", format="%d", min_value=0, max_value=int(df['Cited by'].max()))
+            if "Source title" in columnas_mapeadas: 
+                config_columnas["Source title"] = st.column_config.TextColumn("Revista / Source Title")
+            if "Link" in columnas_mapeadas: 
+                config_columnas["Link"] = st.column_config.LinkColumn("Enlace Oficial Scopus")
             
             st.dataframe(
                 df_mostrar.sort_values(by=df_mostrar.columns[0], ascending=True), 
@@ -237,5 +243,5 @@ def main():
             st.write("**¿Qué representa?** El compendio bibliométrico indexado de la literatura científica internacional sobre Churn bancario.")
             st.write("**¿Cómo se lee esta sección?** Puedes usar el buscador interactivo para agregar o quitar columnas de metadatos en tiempo real, u ordenar las filas haciendo clic directamente sobre las cabeceras de la tabla.")
 
-if __name__ == "__main__":
+        if __name__ == "__main__":
     main()
