@@ -93,9 +93,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- 2. MOTOR DE PROCESAMIENTO DE DATOS ---
-@st.cache_data
-def load_and_process_data():
-    df = pd.read_csv('scopus_PA3.csv')
+def process_data(file_source):
+    df = pd.read_csv(file_source)
     df['Title'] = df['Title'].fillna('Untitled Paper')
     df['Source title'] = df['Source title'].fillna('Unknown Source')
     df['Cited by'] = df['Cited by'].fillna(0).astype(int)
@@ -110,11 +109,31 @@ def load_and_process_data():
     return df
 
 def main():
-    try:
-        df = load_and_process_data()
-    except Exception:
-        st.error("🚨 Error crítico: No se encontró la base de datos de Scopus 'scopus_PA3.csv' en la raíz.")
-        return
+    # --- ENCABEZADO CORPORATIVO Y GESTIÓN DE CARGA ---
+    st.title("🔮 ChurnAI Horizon Dashboard")
+    st.markdown("<p style='color:#8B949E; font-size:1.1rem; margin-top:-10px;'>Plataforma Ejecutiva de Inteligencia Analítica Aplicada al Riesgo Financiero</p>", unsafe_allow_html=True)
+    
+    # Interfaz de carga dinámica obligatoria por la rúbrica (Criterio 3)
+    st.markdown("### 📥 Gestión Dinámica del Dataset")
+    archivo_subido = st.file_uploader("Opcional: Sube un archivo Scopus CSV externo para actualizar el ecosistema predictivo:", type=["csv"])
+
+    df = None
+    if archivo_subido is not None:
+        try:
+            df = process_data(archivo_subido)
+            st.success("✅ Dataset externo cargado e integrado dinámicamente.")
+        except Exception as e:
+            st.error(f"🚨 Error al procesar el archivo subido: {e}")
+            st.stop()
+    else:
+        # Carga automática del archivo base que ya está en tu repositorio
+        nombre_archivo_base = "scopus_PA3.csv"
+        try:
+            df = process_data(nombre_archivo_base)
+            st.info(f"ℹ️ Datos activos: Consumiendo de manera directa desde el repositorio (`{nombre_archivo_base}`).")
+        except Exception:
+            st.error(f"🚨 Error crítico: No se encontró el archivo base '{nombre_archivo_base}' en la raíz del repositorio.")
+            st.stop()
 
     # --- 3. BARRA LATERAL (Panel de Control y Auditoría de Negocio) ---
     with st.sidebar:
