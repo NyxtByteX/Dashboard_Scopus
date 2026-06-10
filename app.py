@@ -1,29 +1,62 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 # --- 1. CONFIGURACIÓN DEL ENTORNO EMPRESARIAL ---
 st.set_page_config(
-    page_title="ChurnAI Horizon - Enterprise Hub", 
+    page_title="ChurnAI Horizon - Executive Analytics", 
     page_icon="🔮", 
     layout="wide", 
     initial_sidebar_state="expanded"
 )
 
-# Estilo CSS Avanzado para romper el molde estático de Streamlit
+# Estilo CSS Avanzado para simular la interfaz oscura y estilizada de Geckoboard/Qlik
 st.markdown("""
     <style>
-        .reportview-container { background: #0E1117; }
-        .stMarkdown { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-        h1, h2, h3 { color: #00CED1 !important; }
-        div[data-testid="stExpander"] { background-color: #161B22; border: 1px solid #30363D; }
-        /* Efecto tarjeta para Top Papers */
+        /* Fondo general oscuro y tipografía limpia */
+        .reportview-container, .main { background: #0B0E14; }
+        body { color: #E6EDF3; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        
+        /* Títulos con acentos de color modernos */
+        h1, h2, h3, h4 { color: #00CED1 !important; font-weight: 600 !important; }
+        
+        /* Contenedores de Tarjetas KPI (Estilo Geckoboard) */
+        .kpi-container {
+            background-color: #161B22;
+            border: 1px solid #30363D;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            margin-bottom: 15px;
+        }
+        .kpi-title { font-size: 0.85rem; color: #8B949E; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        .kpi-value { font-size: 2.2rem; color: #00CED1; font-weight: 700; margin: 10px 0 5px 0; }
+        .kpi-sub { font-size: 0.8rem; color: #58A6FF; }
+
+        /* Banner de Estrategia Central */
+        .strategy-banner {
+            background-color: #12161F; 
+            padding: 22px; 
+            border-radius: 10px; 
+            border-left: 5px solid #FF1493; 
+            margin-bottom: 30px;
+            border-top: 1px solid #30363D;
+            border-right: 1px solid #30363D;
+            border-bottom: 1px solid #30363D;
+        }
+
+        /* Tarjetas de Papers (Pestaña 3) */
         .paper-card {
             background-color: #161B22;
-            padding: 15px;
+            padding: 18px;
             border-radius: 8px;
-            border-top: 4px solid #00CED1;
+            border-top: 4px solid #FF1493;
             margin-bottom: 12px;
+            border-left: 1px solid #30363D;
+            border-right: 1px solid #30363D;
+            border-bottom: 1px solid #30363D;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -31,6 +64,7 @@ st.markdown("""
 # --- 2. MOTOR DE PROCESAMIENTO DE DATOS ---
 @st.cache_data
 def load_and_process_data():
+    # Intenta cargar la base de datos de Scopus
     df = pd.read_csv('scopus_PA3.csv')
     df['Title'] = df['Title'].fillna('Untitled Paper')
     df['Source title'] = df['Source title'].fillna('Unknown Source')
@@ -43,10 +77,10 @@ def main():
     try:
         df = load_and_process_data()
     except Exception:
-        st.error("🚨 Error crítico: No se encontró la base de datos de Scopus 'scopus_PA3.csv' en la raíz.")
+        st.error("🚨 Error crítico: No se encontró la base de datos de Scopus 'scopus_PA3.csv' en la raíz de la aplicación.")
         return
 
-    # --- BARRA LATERAL (Panel de Control Avanzado) ---
+    # --- BARRA LATERAL (Filtros de Control) ---
     with st.sidebar:
         st.image("https://cdn-icons-png.flaticon.com/512/2103/2103832.png", width=50)
         st.title("Control de Datos")
@@ -59,27 +93,17 @@ def main():
         st.markdown("---")
         st.caption("⚡ Powered by ChurnAI Engine v3.5 • Mercado Peruano 2026")
 
-    # Filtrado Dinámico Global
+    # Filtrado Dinámico de Datos Basado en la Interacción del Usuario
     df_filtrado = df[df['Cited by'] >= min_citas].copy()
     if busqueda:
         df_filtrado = df_filtrado[df_filtrado['Abstract_Clean'].str.contains(busqueda.lower()) | 
                                   df_filtrado['Title'].str.lower().str.contains(busqueda.lower())]
 
     # --- ENCABEZADO CORPORATIVO ---
-    st.title("🔮 ChurnAI Horizon")
-    st.subheader("Plataforma Inteligente de Exploración de Datos y Simulación Predictiva Bancaria")
+    st.title("🔮 ChurnAI Horizon Dashboard")
+    st.markdown("<p style='color:#8B949E; font-size:1.1rem; margin-top:-10px;'>Plataforma Ejecutiva de Inteligencia Analítica Aplicada al Riesgo Financiero</p>", unsafe_allow_html=True)
     
-    st.markdown("""
-    <div style='background-color: #161B22; padding: 20px; border-radius: 8px; border-left: 5px solid #FF1493; margin-bottom: 25px;'>
-        <h4 style='color: #FF1493; margin-top:0; margin-bottom:5px;'>📌 ESTRATEGIA CENTRAL DE RETENCIÓN</h4>
-        <p style='color: #E6EDF3; font-size: 1.05rem; line-height: 1.5; margin:0;'>
-            <b>¿Cómo optimiza el uso de machine learning la predicción de la fuga de clientes en el sector bancario?</b><br>
-            La optimización se ejecuta mediante el análisis dinámico de comportamiento. Al interconectar la Big Data de Scopus con disparadores transaccionales locales (Yape, Plin, CTS y variaciones del Score SBS), la IA automatiza la toma de decisiones críticas para congelar la fuga de capitales antes de que el cliente abandone la entidad.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # --- CÁLCULO DOCK DE PESOS (MOTOR CONECTOR DE LA IA) ---
+    # --- CÁLCULO DE PESOS PARA EL MOTOR CONECTOR ---
     menciones_trans = df_filtrado['Abstract_Clean'].str.contains('transaction|behavio|digital|channel').sum()
     menciones_score = df_filtrado['Abstract_Clean'].str.contains('credit score|credit history|credit|risk|sbs').sum()
     menciones_demo  = df_filtrado['Abstract_Clean'].str.contains('demograph|age|gender|income|status').sum()
@@ -89,22 +113,74 @@ def main():
 
     # --- ESTRUCTURACIÓN DE PESTAÑAS ---
     tab1, tab2, tab3 = st.tabs([
-        "📊 Explorador de Tendencias e Impacto", 
+        "📊 Dashboard de Control e Impacto", 
         "🔮 Simulador Financiero Conectado (Bancos Perú)", 
         "📚 Centro de Datos e Insights"
     ])
 
     # =========================================================================
-    # PESTAÑA 1: REEMPLAZOS DE GRÁFICOS (DE ACADÉMICO A STARTUP)
+    # PESTAÑA 1: REDISEÑO COMPLETO ESTILO GECKBOARD / QLIK FINANCE
     # =========================================================================
     with tab1:
-        st.markdown("### 🧬 Universo de Datos de la Literatura Científica")
+        # 1. FILA DE TARJETAS KPI SUPERIORES (Métricas del Documento)
+        col_kpi1, col_kpi2, col_kpi3, col_kpi4 = st.columns(4)
         
-        # GRID INICIAL: Ránking de Métricas + Violín de Distribución
-        col_g1, col_g2 = st.columns(2)
+        with col_kpi1:
+            total_papers = len(df_filtrado)
+            st.markdown(f"""
+                <div class="kpi-container">
+                    <div class="kpi-title">Volumen de Literatura</div>
+                    <div class="kpi-value">{total_papers}</div>
+                    <div class="kpi-sub">Estudios Científicos Filtrados</div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+        with col_kpi2:
+            total_citas = df_filtrado['Cited by'].sum()
+            st.markdown(f"""
+                <div class="kpi-container">
+                    <div class="kpi-title">Impacto Global</div>
+                    <div class="kpi-value">{total_citas:,}</div>
+                    <div class="kpi-sub">Citas Totales en Scopus</div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+        with col_kpi3:
+            max_citas = df_filtrado['Cited by'].max() if len(df_filtrado) > 0 else 0
+            st.markdown(f"""
+                <div class="kpi-container">
+                    <div class="kpi-title">Récord de Relevancia</div>
+                    <div class="kpi-value">{max_citas}</div>
+                    <div class="kpi-sub font-weight-bold">Máximo de Citas en un Paper</div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+        with col_kpi4:
+            promedio_citas = df_filtrado['Cited by'].mean() if len(df_filtrado) > 0 else 0
+            st.markdown(f"""
+                <div class="kpi-container">
+                    <div class="kpi-title">Densidad Científica</div>
+                    <div class="kpi-value">{promedio_citas:.1f}</div>
+                    <div class="kpi-sub">Promedio de Citas por Registro</div>
+                </div>
+            """, unsafe_allow_html=True)
+
+        # 2. SECCIÓN ESTRATÉGICA CENTRAL
+        st.markdown(f"""
+        <div class="strategy-banner">
+            <h4 style='color: #FF1493; margin-top:0; margin-bottom:8px;'>📌 PREGUNTA DE INVESTIGACIÓN Y ENFOQUE ESTRATÉGICO</h4>
+            <p style='color: #E6EDF3; font-size: 1.05rem; line-height: 1.5; margin:0;'>
+                <b>¿Cómo optimiza el uso de machine learning la predicción de la fuga de clientes en el sector bancario?</b><br>
+                La optimización se ejecuta mediante el análisis dinámico de comportamiento. Al interconectar la Big Data de Scopus con disparadores transaccionales locales (Yape, Plin, CTS y variaciones del Score SBS), la IA automatiza la toma de decisiones críticas para congelar la fuga de capitales antes de que el cliente abandone la entidad.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # 3. FILA DE GRÁFICOS PRINCIPALES (Estructura en paralelo de alto rendimiento)
+        col_g1, col_g2 = st.columns([1, 1])
         
         with col_g1:
-            st.markdown("#### 🎯 Ranking de Rendimiento de Métricas")
+            st.markdown("#### 🎯 Predominancia de Métricas Matemáticas de Validación")
             metricas_data = [
                 {'Métrica': 'Accuracy', 'Papers': df_filtrado['Abstract_Clean'].str.contains('accuracy').sum()},
                 {'Métrica': 'F1-Score', 'Papers': df_filtrado['Abstract_Clean'].str.contains('f1|f-measure').sum()},
@@ -112,90 +188,83 @@ def main():
             ]
             df_m = pd.DataFrame(metricas_data).sort_values(by="Papers", ascending=True)
             
-            fig_bar = px.bar(df_m, x="Papers", y="Métrica", orientation="h", template="plotly_dark", color="Papers", color_continuous_scale=["#FF1493", "#00CED1"])
-            fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False)
+            # Gráfico de Barras Horizontal Corporativo
+            fig_bar = px.bar(
+                df_m, x="Papers", y="Métrica", orientation="h", 
+                template="plotly_dark", color="Papers", 
+                color_continuous_scale=["#FF1493", "#00CED1"]
+            )
+            fig_bar.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', 
+                coloraxis_showscale=False, margin=dict(l=10, r=10, t=10, b=10),
+                xaxis=dict(gridcolor="#1F2937"), yaxis=dict(gridcolor="rgba(0,0,0,0)")
+            )
             st.plotly_chart(fig_bar, use_container_width=True)
-            
-            st.info(f"📌 **Qué significa esto:** El gráfico jerarquiza qué indicadores matemáticos eligen los científicos de datos globales para validar modelos de fuga bancaria.")
+            st.caption("Muestra la distribución de los KPI de error/acierto seleccionados por investigadores a nivel mundial para validar modelos predictivos bancarios.")
 
         with col_g2:
-            st.markdown("#### 📈 Distribución Temporal de Citaciones Científicas")
-            fig_violin = px.violin(df_filtrado, x="Year", y="Cited by", box=True, points="all", template="plotly_dark", color_discrete_sequence=["#00CED1"])
-            fig_violin.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-            st.plotly_chart(fig_violin, use_container_width=True)
+            st.markdown("#### 📈 Distribución de Madurez Tecnológica e Impacto (Anual)")
             
-            st.info(f"🧠 **Lo que está pasando en los datos:** Cada punto representa un paper indexado. El ancho del violín te muestra las épocas con mayor concentración de publicaciones de alto impacto.")
+            # Gráfico de Violín con visualización de densidad de datos limpia
+            fig_violin = px.violin(
+                df_filtrado, x="Year", y="Cited by", box=True, 
+                points="all", template="plotly_dark", 
+                color_discrete_sequence=["#00CED1"]
+            )
+            fig_violin.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                margin=dict(l=10, r=10, t=10, b=10),
+                xaxis=dict(title="Año de Publicación", gridcolor="#1F2937"),
+                yaxis=dict(title="Volumen de Citaciones", gridcolor="#1F2937")
+            )
+            st.plotly_chart(fig_violin, use_container_width=True)
+            st.caption("Cada punto representa una investigación científica. El ancho representa la densidad de publicaciones en ese periodo.")
 
-        st.markdown("---")
+        st.markdown("<br>", unsafe_allow_html=True)
         
-        # REEMPLAZO OPTIMIZADO: MAPA DE RELACIÓN Y RELEVANCIA DE VARIABLES (INDIVIDUAL Y VECTORIZADO)
-        st.markdown("#### 🧩 Mapa de Relación y Relevancia de Variables Financieras (Scatter Intelligence Map)")
-        st.markdown("Cada burbuja representa un **estudio científico individual**. Su posición mapea el año de publicación frente a su dimensión predictiva principal; el tamaño de la burbuja es proporcional a su impacto global (citas).")
+        # 4. GRÁFICA DE TENDENCIAS CONTINUAS (Reemplazo del Scatter inestable)
+        st.markdown("#### 📈 Evolución Histórica de Dimensiones Críticas de Entrada (Trendline Analysis)")
         
         if len(df_filtrado) > 0:
-            # Procesamiento de texto de manera súper veloz y segura (Vectorizado)
             text_comb = df_filtrado['Abstract_Clean'] + " " + df_filtrado['Title'].str.lower()
             
-            c_trans = text_comb.str.count('transaction|behavio|digital|channel|yape|plin')
-            c_score = text_comb.str.count('credit|score|history|risk|sbs|infocorp')
-            c_demo = text_comb.str.count('demograph|age|gender|income|status|sueldo')
+            c_trans = text_comb.str.contains('transaction|behavio|digital|channel|yape|plin').astype(int)
+            c_score = text_comb.str.contains('credit|score|history|risk|sbs|infocorp').astype(int)
+            c_demo = text_comb.str.contains('demograph|age|gender|income|status|sueldo').astype(int)
             
-            counts_df = pd.DataFrame({'trans': c_trans, 'score': c_score, 'demo': c_demo})
-            max_val = counts_df.max(axis=1)
-            
-            # Clasificación inteligente basada en la métrica máxima dominante
-            def calcular_dominante(row):
-                if row['max_v'] == 0: return "⚙️ Enfoque General / Algorítmico"
-                elif row['trans'] == row['max_v']: return "📱 Transacciones e Interactividad"
-                elif row['score'] == row['max_v']: return "💳 Historial Crediticio (SBS)"
-                else: return "👤 Datos Demográficos y Perfil"
-                
-            counts_df['max_v'] = max_val
-            dominant_series = counts_df.apply(calcular_dominante, axis=1)
-            
-            df_pf = pd.DataFrame({
-                'Título': df_filtrado['Title'],
+            df_trends = pd.DataFrame({
                 'Año': df_filtrado['Year'],
-                'Citas': df_filtrado['Cited by'],
-                'Revista': df_filtrado['Source title'],
-                'Variable Dominante': dominant_series,
-                'Tamaño_Visual': df_filtrado['Cited by'] + 12
+                '📱 Transacciones e Interactividad': c_trans,
+                '💳 Historial Crediticio (SBS)': c_score,
+                '👤 Datos Demográficos y Perfil': c_demo
             })
+            
+            df_trends_grouped = df_trends.groupby('Año').sum().reset_index()
+            df_melted = df_trends_grouped.melt(id_vars='Año', var_name='Dimensión Crítica', value_name='Cantidad de Investigaciones')
             
             color_map = {
                 "📱 Transacciones e Interactividad": "#00CED1",
                 "💳 Historial Crediticio (SBS)": "#FF1493",
-                "👤 Datos Demográficos y Perfil": "#FFFF00",
-                "⚙️ Enfoque General / Algorítmico": "#8B949E"
+                "👤 Datos Demográficos y Perfil": "#FFFF00"
             }
             
-            fig_scatter = px.scatter(
-                df_pf, x="Año", y="Variable Dominante", size="Tamaño_Visual", color="Variable Dominante",
-                color_discrete_map=color_map, template="plotly_dark", hover_name="Título",
-                custom_data=["Citas", "Revista"]
+            fig_line = px.line(
+                df_melted, x="Año", y="Cantidad de Investigaciones", color="Dimensión Crítica",
+                color_discrete_map=color_map, template="plotly_dark", markers=True
             )
             
-            fig_scatter.update_traces(
-                hovertemplate="<b>📈 %{hovertext}</b><br><br>" +
-                              "📅 <b>Año de Publicación:</b> %{x}<br>" +
-                              "🔥 <b>Citas Globales (Scopus):</b> %{customdata[0]}<br>" +
-                              "📚 <b>Revista Indexada:</b> %{customdata[1]}<extra></extra>"
-            )
-            
-            fig_scatter.update_layout(
+            fig_line.update_layout(
                 paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                xaxis=dict(title="Línea de Tiempo de la Literatura", gridcolor="#21262D", tickmode="linear"),
-                yaxis=dict(title="Dimensión Crítica del Modelo", gridcolor="#21262D", autorange="reversed"),
-                showlegend=False, height=450
+                xaxis=dict(title="Línea de Tiempo (Años)", gridcolor="#21262D", tickmode="linear"),
+                yaxis=dict(title="Volumen de Papers Indexados", gridcolor="#21262D"),
+                hovermode="x unified", margin=dict(l=10, r=10, t=10, b=10)
             )
-            
-            st.plotly_chart(fig_scatter, use_container_width=True)
-            st.success("💡 **Insight Automático:** Explora el mapa interactivo pasando el cursor sobre las burbujas. Los cúmulos densos revelan hacia dónde se está moviendo la arquitectura de riesgos en la banca actual.")
+            st.plotly_chart(fig_line, use_container_width=True)
         else:
-            st.warning("⚠️ Filtros muy restrictivos. No hay suficientes registros científicos para trazar el Scatter Map.")
+            st.warning("⚠️ No hay datos suficientes con los criterios de filtrado actuales para trazar las líneas de tendencia.")
 
     # =========================================================================
-    # PESTAÑA 2: SIMULADOR FINANCIERO PERÚ (100% CONECTADO)
+    # PESTAÑA 2: SIMULADOR FINANCIERO (CONSERVADO COMPLETO)
     # =========================================================================
     with tab2:
         st.markdown("### 🔮 Motor de Simulación de Riesgo Bancario Local")
@@ -246,14 +315,13 @@ def main():
                 st.error("🔴 **Intervención Inmediata / Alerta Crítica:** Fuga inminente de haberes. El protocolo bancario exige asignar el caso de forma prioritaria a un asesor Élite de telemarketing para negociar una contraoferta en su tasa de interés o beneficios en Cuenta Sueldo en menos de 12 horas.")
 
     # =========================================================================
-    # PESTAÑA 3: TOP PAPERS ESTILO NETFLIX / CARDS VISUALES
+    # PESTAÑA 3: CENTRO DE DATOS E INSIGHTS (CONSERVADO COMPLETO)
     # =========================================================================
     with tab3:
         st.markdown("### 📚 Centro de Inteligencia y Auditoría Bibliométrica")
         st.markdown("A continuación, se exponen los papers científicos de mayor impacto que respaldan las lógicas predictivas configuradas en las secciones anteriores.")
         
-        st.markdown("#### 🏆 Top 3 Papers Más Citados (Estructura de Tarjetas Avanzadas)")
-        
+        st.markdown("#### 🏆 Top 3 Papers Más Citados (Estructura de Tarjetas Advanced)")
         top_papers = df_filtrado.sort_values(by="Cited by", ascending=False).head(3)
         
         if len(top_papers) > 0:
