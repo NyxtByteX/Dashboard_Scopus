@@ -136,13 +136,11 @@ def main():
         with col_sim1:
             st.markdown("#### ⚙️ Entrada de Datos del Cliente (Variables Predictoras)")
             
-            # Contextualización de entidades bancarias del Perú
             banco_seleccionado = st.selectbox(
                 "Selecciona la entidad del ecosistema financiero local a evaluar:",
                 ["Banco de Crédito del Perú (BCP)", "BBVA Perú", "Interbank", "Scotiabank Perú"]
             )
             
-            # Variables críticas reales del mercado peruano
             caida_trans = st.slider("1. ¿Qué porcentaje de reducción presenta en su actividad digital (Yape / Plin, transferencias interbancarias) en el último mes? (%)", 0, 100, 25)
             score_infocorp = st.slider("2. ¿Cuál es el Score Crediticio interno del cliente (ej. Sentinel / SBS / Equifax)?", 300, 850, 680)
             portabilidad_sueldo = st.radio("3. ¿El sistema detecta solicitudes pendientes de portabilidad de Cuenta Sueldo o retiro total de CTS?", ["No", "Sí"])
@@ -170,7 +168,6 @@ def main():
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("#### 📋 Plan de Acción Operativo (SBS / Regulación Local)")
             
-            # Acciones adaptadas a las estrategias reales de retención en Perú
             if riesgo_final < 40:
                 st.success(f"🟢 **Riesgo Bajo / Estable:** El cliente mantiene alta fidelidad. Mantener el envío de campañas cruzadas estándar (ej. Beneficios con Millas Benefit/LATAM Pass o promociones exclusivas en la App del banco).")
             elif 40 <= riesgo_final < 70:
@@ -222,7 +219,6 @@ def main():
             if "Year" in columnas_mapeadas: 
                 config_columnas["Year"] = st.column_config.NumberColumn("Año", format="%d")
             if "Cited by" in columnas_mapeadas: 
-                # ¡Coma eliminada aquí al final!
                 config_columnas["Cited by"] = st.column_config.ProgressColumn("Citas", format="%d", min_value=0, max_value=int(df['Cited by'].max()))
             if "Source title" in columnas_mapeadas: 
                 config_columnas["Source title"] = st.column_config.TextColumn("Revista / Source Title")
@@ -243,5 +239,5 @@ def main():
             st.write("**¿Qué representa?** El compendio bibliométrico indexado de la literatura científica internacional sobre Churn bancario.")
             st.write("**¿Cómo se lee esta sección?** Puedes usar el buscador interactivo para agregar o quitar columnas de metadatos en tiempo real, u ordenar las filas haciendo clic directamente sobre las cabeceras de la tabla.")
 
-        if __name__ == "__main__":
+if __name__ == "__main__":
     main()
