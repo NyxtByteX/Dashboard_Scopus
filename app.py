@@ -1,3 +1,8 @@
+Aquí tienes el código completo y listo para producción. He reestructurado toda la **Pestaña 1** aplicando un diseño de **columnas asimétricas (`[1.2, 0.8]`)**.
+
+Ahora, cada uno de los gráficos principales (barras y dona) tiene su bloque explicativo integrado de manera nativa al costado derecho, eliminando por completo los espacios vacíos y dándole al dashboard un look ejecutivo impecable.
+
+```python
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -47,16 +52,15 @@ st.markdown("""
             border-bottom: 1px solid #30363D;
         }
 
-        /* Glosarios y Leyendas Explicativas Inferiores */
+        /* Glosarios y Leyendas Explicativas Laterales */
         .chart-glossary {
             background-color: #161B22;
-            padding: 14px;
-            border-radius: 6px;
-            border: 1px solid #21262D;
-            margin-top: 12px;
+            padding: 18px;
+            border-radius: 8px;
+            border: 1px solid #30363D;
             font-size: 0.88rem;
             color: #C9D1D9;
-            line-height: 1.4;
+            line-height: 1.5;
         }
 
         /* Tarjetas de Papers (Top Papers) */
@@ -192,11 +196,14 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-        # 3. FILA A: DOS GRÁFICOS DE BARRAS SIMÉTRICOS
-        col_barras1, col_barras2 = st.columns(2)
+        # 3. FILA A: DOS BLOQUES GRÁFICOS CON EXPLICACIÓN AL COSTADO (DISEÑO ASIMÉTRICO COHESIVO)
+        st.markdown("### 🧠 Análisis de Palabras Clave y Métricas Técnicas")
         
-        with col_barras1:
-            st.markdown("#### 🧠 Densidad de Conceptos de Riesgo en la Literatura")
+        # --- BLOQUE 1: DENSIDAD DE CONCEPTOS ---
+        col_g1_izq, col_g1_der = st.columns([1.2, 0.8])
+        
+        with col_g1_izq:
+            st.markdown("#### Densidad de Conceptos de Riesgo en la Literatura")
             conceptos = ['churn', 'risk', 'accuracy', 'credit', 'transaction', 'banking', 'neural']
             conteos = [df_filtrado['Abstract_Clean'].str.contains(c).sum() for c in conceptos]
             df_conceptos = pd.DataFrame({'Concepto': [c.upper() for c in conceptos], 'Frecuencia': conteos}).sort_values(by='Frecuencia', ascending=True)
@@ -205,18 +212,25 @@ def main():
             fig_words.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=15, b=10))
             st.plotly_chart(fig_words, use_container_width=True)
             
-            # Glosario Explicativo Gráfico 1
+        with col_g1_der:
+            st.markdown("<br><br>", unsafe_allow_html=True)  # Alineador simétrico
             st.markdown("""
             <div class="chart-glossary">
-                <b>💡 Glosario de Conceptos de Riesgo:</b><br>
+                <h5 style="color: #00CED1 !important; margin-top: 0; margin-bottom: 10px;">💡 Glosario de Conceptos de Riesgo</h5>
+                <p style="margin-bottom: 8px;">Este gráfico rastrea la frecuencia con la que los modelos predictivos asocian ciertas palabras dentro de los resúmenes académicos:</p>
                 • <b>CHURN / BANKING:</b> Volumen de investigaciones enfocadas estrictamente en la pérdida y retención de clientes en banca.<br>
                 • <b>RISK / CREDIT:</b> Estudios dirigidos a mitigar el peligro crediticio o de impago financiero.<br>
                 • <b>ACCURACY / NEURAL:</b> Documentos técnicos que priorizan la precisión algorítmica mediante redes neuronales complejas.
             </div>
             """, unsafe_allow_html=True)
 
-        with col_barras2:
-            st.markdown("#### 🎯 Predominancia de Métricas")
+        st.markdown("---")
+
+        # --- BLOQUE 2: PREDOMINANCIA DE MÉTRICAS ---
+        col_g2_izq, col_g2_der = st.columns([1.2, 0.8])
+        
+        with col_g2_izq:
+            st.markdown("#### Predominancia de Métricas de Evaluación")
             metricas_data = [
                 {'Métrica': 'Accuracy', 'Papers': df_filtrado['Abstract_Clean'].str.contains('accuracy').sum()},
                 {'Métrica': 'F1-Score', 'Papers': df_filtrado['Abstract_Clean'].str.contains('f1|f-measure').sum()},
@@ -227,43 +241,48 @@ def main():
             fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=15, b=10))
             st.plotly_chart(fig_bar, use_container_width=True)
             
-            # Glosario Explicativo Gráfico 2
+        with col_g2_der:
+            st.markdown("<br><br>", unsafe_allow_html=True)  # Alineador simétrico
             st.markdown("""
             <div class="chart-glossary">
-                <b>💡 Guía de Métricas de Machine Learning:</b><br>
-                • <b>Accuracy (Exactitud):</b> Porcentaje total de predicciones correctas del modelo. Puede ser engañoso si los datos de fuga están desbalanceados.<br>
+                <h5 style="color: #FF1493 !important; margin-top: 0; margin-bottom: 10px;">🎯 Guía de Métricas de Machine Learning</h5>
+                <p style="margin-bottom: 8px;">Define qué criterio técnico se utilizó en la literatura para validar que el modelo realmente funciona:</p>
+                • <b>Accuracy (Exactitud):</b> Porcentaje total de predicciones correctas. Puede ser engañoso si los datos de fuga están muy desbalanceados.<br>
                 • <b>F1-Score:</b> Balance armónico entre precisión y exhaustividad. Es la métrica reina cuando hay pocos clientes que fugan frente a muchos que se quedan.<br>
-                • <b>AUC-ROC:</b> Mide la capacidad del modelo para separar correctamente a un cliente leal de uno en riesgo de abandono.
+                • <b>AUC-ROC:</b> Mide la capacidad del modelo para separar correctamente a un cliente leal de uno en riesgo latente de abandono.
             </div>
             """, unsafe_allow_html=True)
 
         st.markdown("---")
 
-        # 4. FILA B: ORIGEN DE VALIDACIÓN (Dona Centralizada)
-        col_pie_izq, col_pie_centro, col_pie_der = st.columns([0.5, 1, 0.5])
-        with col_pie_centro:
-            st.markdown("<h4 style='text-align: center;'>🔬 Origen de Validación Académica (Distribución de Literatura)</h4>", unsafe_allow_html=True)
+        # --- BLOQUE 3: ORIGEN DE VALIDACIÓN (DONA) ---
+        col_g3_izq, col_g3_der = st.columns([1.2, 0.8])
+        
+        with col_g3_izq:
+            st.markdown("#### Origen de Validación Académica (Distribución de Literatura)")
             if len(df_filtrado) > 0:
                 fig_pie = px.pie(df_filtrado, names='Document Type', template='plotly_dark', hole=0.4, color_discrete_sequence=["#00CED1", "#FF1493", "#FFFF00", "#FF4500"])
-                fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=10, r=10, t=10, b=10), legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
+                fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=10, r=10, t=15, b=10), legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5))
                 st.plotly_chart(fig_pie, use_container_width=True)
-                
-                # Glosario Explicativo Gráfico 3
-                st.markdown("""
-                <div class="chart-glossary" style="text-align: justify;">
-                    <b>📊 Tipos de Documentación Científica y su Utilidad Comercial:</b><br>
-                    • <b>Article (Artículo de Revista):</b> Investigaciones maduras, revisadas por pares y con validaciones matemáticas extensas. Ideal para sustentar metodologías robustas.<br>
-                    • <b>Conference Paper (Actas de Congresos):</b> Tecnologías disruptivas y algoritmos emergentes de última generación que se exponen rápidamente en la industria tecnológica.<br>
-                    • <b>Book / Book Chapter:</b> Compendios teóricos y marcos de trabajo globales útiles para estructurar la gobernanza de datos a nivel corporativo.
-                </div>
-                """, unsafe_allow_html=True)
             else:
                 st.caption("Sin datos para segmentar.")
+                
+        with col_g3_der:
+            st.markdown("<br><br>", unsafe_allow_html=True)  # Alineador simétrico
+            st.markdown("""
+            <div class="chart-glossary">
+                <h5 style="color: #FFFF00 !important; margin-top: 0; margin-bottom: 10px;">📊 Tipos de Documentación Científica</h5>
+                <p style="margin-bottom: 8px;">Clasificación de los documentos según la rigurosidad e intención metodológica del estudio:</p>
+                • <b>Article (Artículo de Revista):</b> Investigaciones maduras, revisadas por pares y con validaciones matemáticas extensas. Ideal para sustentar metodologías robustas.<br>
+                • <b>Conference Paper (Actas de Congresos):</b> Tecnologías disruptivas y algoritmos emergentes de última generación que se exponen rápidamente en la industria tecnológica.<br>
+                • <b>Book / Book Chapter:</b> Compendios teóricos y marcos de trabajo globales útiles para estructurar la gobernanza de datos a nivel corporativo.
+            </div>
+            """, unsafe_allow_html=True)
 
-        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("---")
         
-        # 5. GRÁFICA DE TENDENCIAS CONTINUAS (A ancho completo e interacción individualizada)
+        # 4. GRÁFICA DE TENDENCIAS CONTINUAS
         st.markdown("#### 📈 Evolución Histórica de Dimensiones Críticas de Entrada (Trendline Analysis)")
         if len(df_filtrado) > 0:
             text_comb = df_filtrado['Abstract_Clean'] + " " + df_filtrado['Title'].str.lower()
@@ -300,19 +319,18 @@ def main():
             )
             st.plotly_chart(fig_line, use_container_width=True)
             
-            # Glosario Explicativo Gráfico 4
             st.markdown("""
-            <div class="chart-glossary">
+            <div class="chart-glossary" style="margin-top: 15px;">
                 <b>📈 Significado de las Dimensiones Analizadas (Inputs del Modelo):</b><br>
                 • <b>📱 Transacciones e Interactividad:</b> Mide la frecuencia de uso de billeteras digitales (Yape/Plin) y canales web. Si baja la interacción, el riesgo de fuga se dispara de inmediato.<br>
-                • <b>💳 Historial Crediticio (SBS):</b> Reportes de endeudamiento externo y variaciones en el score crediticio regulado. Detecta si el cliente se está financiando con la competencia.<br>
+                • <b>💳 Historial Crediticio (SBS):</b> Reportes de endeudamiento externo y variaciones en el score crediticio regulado. Detecta si el cliente se está financiarizando con la competencia.<br>
                 • <b>👤 Datos Demográficos y Perfil:</b> Variables base estables (edad, nivel de ingresos consolidados, variaciones salariales) utilizadas para segmentar el comportamiento del usuario.
             </div>
             """, unsafe_allow_html=True)
             
         st.markdown("---")
 
-        # 6. DISTRIBUCIÓN DE MADUREZ (A ancho completo abajo)
+        # 5. DISTRIBUCIÓN DE MADUREZ
         st.markdown("#### 📊 Distribución de Madurez e Impacto Científico por Año")
         if len(df_filtrado) > 0:
             fig_violin = px.violin(
@@ -332,9 +350,8 @@ def main():
             )
             st.plotly_chart(fig_violin, use_container_width=True)
             
-            # Glosario Explicativo Gráfico 5
             st.markdown("""
-            <div class="chart-glossary">
+            <div class="chart-glossary" style="margin-top: 15px;">
                 <b>📊 Guía de Interpretación de Madurez de la Literatura (Gráfico de Violín/Caja):</b><br>
                 • <b>Eje Vertical (Citas Scopus):</b> Representa el peso o la influencia mundial que posee un estudio. A mayor cantidad de citas, más validado y probado está ese algoritmo en entornos reales.<br>
                 • <b>Cuerpo del Violín (Puntos Dispersos):</b> Cada punto flotante es un paper. Las concentraciones densas muestran los años donde la industria unificó criterios, mientras que los puntos solitarios en la cima son las metodologías "Récord" o pilares de la analítica predictiva bancaria.
