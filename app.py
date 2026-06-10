@@ -29,8 +29,7 @@ h1, h2, h3 { font-family: 'Inter', sans-serif; }
 @st.cache_data
 def load_data(source, file=None):
     if source == "GitHub":
-        url = "https://raw.githubusercontent.com/USUARIO/REPO/main/scopus_PA3.csv"
-        df = pd.read_csv(url)
+        df = pd.read_csv("scopus_PA3.csv")
     else:
         df = pd.read_csv(file)
 
