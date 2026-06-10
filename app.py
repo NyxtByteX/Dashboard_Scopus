@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilo CSS Avanzado (Simulación Geckoboard / Qlik Dark Mode)
+# Estilo CSS Avanzado (Alineación Perfecta y Simetría Visual)
 st.markdown("""
     <style>
         /* Fondo general oscuro y tipografía limpia */
@@ -47,15 +47,22 @@ st.markdown("""
             border-bottom: 1px solid #30363D;
         }
 
-        /* Glosarios y Leyendas Explicativas Laterales */
+        /* Glosarios con centrado vertical matemático y altura consistente con los gráficos */
+        .glossary-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 340px; /* Sincronizado exactamente con la altura asignada a Plotly */
+        }
+        
         .chart-glossary {
             background-color: #161B22;
-            padding: 18px;
+            padding: 22px;
             border-radius: 8px;
             border: 1px solid #30363D;
             font-size: 0.88rem;
             color: #C9D1D9;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         /* Tarjetas de Papers (Top Papers) */
@@ -137,7 +144,7 @@ def main():
         st.markdown("---")
         st.caption("⚡ Powered by ChurnAI Engine v3.5 • Mercado Peruano 2026")
 
-    # Filtrado Dinámico de Datos Basado en la Interacción del Usuario
+    # Filtrado Dinámico de Datos
     df_filtrado = df[df['Cited by'] >= min_citas].copy()
     if busqueda:
         df_filtrado = df_filtrado[df_filtrado['Abstract_Clean'].str.contains(busqueda.lower()) | 
@@ -163,10 +170,10 @@ def main():
     ])
 
     # =========================================================================
-    # PESTAÑA 1: DASHBOARD DE CONTROL ESTILO GECKBOARD / QLIK FINANCE
+    # PESTAÑA 1: DASHBOARD DE CONTROL CON CENTRADO Y ALINEACIÓN PERFECTA
     # =========================================================================
     with tab1:
-        # 1. FILA DE TARJETAS KPI SUPERIORES (Métricas del Documento)
+        # 1. FILA DE TARJETAS KPI SUPERIORES
         col_kpi1, col_kpi2, col_kpi3, col_kpi4 = st.columns(4)
         
         with col_kpi1:
@@ -191,11 +198,10 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-        # 3. FILA A: DOS BLOQUES GRÁFICOS CON EXPLICACIÓN AL COSTADO (DISEÑO ASIMÉTRICO COHESIVO)
         st.markdown("### 🧠 Análisis de Palabras Clave y Métricas Técnicas")
         
-        # --- BLOQUE 1: DENSIDAD DE CONCEPTOS ---
-        col_g1_izq, col_g1_der = st.columns([1.2, 0.8])
+        # --- BLOQUE 1: DENSIDAD DE CONCEPTOS (Columnas simétricas y centradas) ---
+        col_g1_izq, col_g1_der = st.columns([1, 1])
         
         with col_g1_izq:
             st.markdown("#### Densidad de Conceptos de Riesgo en la Literatura")
@@ -204,25 +210,26 @@ def main():
             df_conceptos = pd.DataFrame({'Concepto': [c.upper() for c in conceptos], 'Frecuencia': conteos}).sort_values(by='Frecuencia', ascending=True)
             
             fig_words = px.bar(df_conceptos, x='Frecuencia', y='Concepto', orientation='h', template='plotly_dark', color='Frecuencia', color_continuous_scale=['#FF1493', "#00CED1"])
-            fig_words.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=15, b=10))
+            fig_words.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=0, r=0, t=10, b=0), height=340)
             st.plotly_chart(fig_words, use_container_width=True)
             
         with col_g1_der:
-            st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("""
-            <div class="chart-glossary">
-                <h5 style="color: #00CED1 !important; margin-top: 0; margin-bottom: 10px;">💡 Glosario de Conceptos de Riesgo</h5>
-                <p style="margin-bottom: 8px;">Este gráfico rastrea la frecuencia con la que los modelos predictivos asocian ciertas palabras dentro de los resúmenes académicos:</p>
-                • <b>CHURN / BANKING:</b> Volumen de investigaciones enfocadas estrictamente en la pérdida y retención de clientes en banca.<br>
-                • <b>RISK / CREDIT:</b> Estudios dirigidos a mitigar el peligro crediticio o de impago financiero.<br>
-                • <b>ACCURACY / NEURAL:</b> Documentos técnicos que priorizan la precisión algorítmica mediante redes neuronales complejas.
+            <div class="glossary-wrapper">
+                <div class="chart-glossary">
+                    <h5 style="color: #00CED1 !important; margin-top: 0; margin-bottom: 10px;">💡 Glosario de Conceptos de Riesgo</h5>
+                    <p style="margin-bottom: 8px;">Este gráfico rastrea la frecuencia con la que los modelos predictivos asocian ciertas palabras dentro de los resúmenes académicos:</p>
+                    • <b>CHURN / BANKING:</b> Volumen de investigaciones enfocadas estrictamente en la pérdida y retención de clientes en banca.<br>
+                    • <b>RISK / CREDIT:</b> Estudios dirigidos a mitigar el peligro crediticio o de impago financiero.<br>
+                    • <b>ACCURACY / NEURAL:</b> Documentos técnicos que priorizan la precisión algorítmica mediante redes neuronales complejas.
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
         st.markdown("---")
 
         # --- BLOQUE 2: PREDOMINANCIA DE MÉTRICAS ---
-        col_g2_izq, col_g2_der = st.columns([1.2, 0.8])
+        col_g2_izq, col_g2_der = st.columns([1, 1])
         
         with col_g2_izq:
             st.markdown("#### Predominancia de Métricas de Evaluación")
@@ -233,44 +240,46 @@ def main():
             ]
             df_m = pd.DataFrame(metricas_data).sort_values(by="Papers", ascending=True)
             fig_bar = px.bar(df_m, x="Papers", y="Métrica", orientation="h", template="plotly_dark", color="Papers", color_continuous_scale=["#FF1493", "#00CED1"])
-            fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=15, b=10))
+            fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=0, r=0, t=10, b=0), height=340)
             st.plotly_chart(fig_bar, use_container_width=True)
             
         with col_g2_der:
-            st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("""
-            <div class="chart-glossary">
-                <h5 style="color: #FF1493 !important; margin-top: 0; margin-bottom: 10px;">🎯 Guía de Métricas de Machine Learning</h5>
-                <p style="margin-bottom: 8px;">Define qué criterio técnico se utilizó en la literatura para validar que el modelo realmente funciona:</p>
-                • <b>Accuracy (Exactitud):</b> Porcentaje total de predicciones correctas. Puede ser engañoso si los datos de fuga están muy desbalanceados.<br>
-                • <b>F1-Score:</b> Balance armónico entre precisión y exhaustividad. Es la métrica reina cuando hay pocos clientes que fugan frente a muchos que se quedan.<br>
-                • <b>AUC-ROC:</b> Mide la capacidad del modelo para separar correctamente a un cliente leal de uno en riesgo latente de abandono.
+            <div class="glossary-wrapper">
+                <div class="chart-glossary">
+                    <h5 style="color: #FF1493 !important; margin-top: 0; margin-bottom: 10px;">🎯 Guía de Métricas de Machine Learning</h5>
+                    <p style="margin-bottom: 8px;">Define qué criterio técnico se utilizó en la literatura para validar que el modelo realmente funciona:</p>
+                    • <b>Accuracy (Exactitud):</b> Porcentaje total de predicciones correctas. Puede ser engañoso si los datos de fuga están muy desbalanceados.<br>
+                    • <b>F1-Score:</b> Balance armónico entre precisión y exhaustividad. Es la métrica reina cuando hay pocos clientes que fugan frente a muchos que se quedan.<br>
+                    • <b>AUC-ROC:</b> Mide la capacidad del modelo para separar correctamente a un cliente leal de uno en riesgo latente de abandono.
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
         st.markdown("---")
 
         # --- BLOQUE 3: ORIGEN DE VALIDACIÓN (DONA) ---
-        col_g3_izq, col_g3_der = st.columns([1.2, 0.8])
+        col_g3_izq, col_g3_der = st.columns([1, 1])
         
         with col_g3_izq:
             st.markdown("#### Origen de Validación Académica (Distribución de Literatura)")
             if len(df_filtrado) > 0:
                 fig_pie = px.pie(df_filtrado, names='Document Type', template='plotly_dark', hole=0.4, color_discrete_sequence=["#00CED1", "#FF1493", "#FFFF00", "#FF4500"])
-                fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=10, r=10, t=15, b=10), legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5))
+                fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=10, b=0), height=340, legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5))
                 st.plotly_chart(fig_pie, use_container_width=True)
             else:
                 st.caption("Sin datos para segmentar.")
                 
         with col_g3_der:
-            st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("""
-            <div class="chart-glossary">
-                <h5 style="color: #FFFF00 !important; margin-top: 0; margin-bottom: 10px;">📊 Tipos de Documentación Científica</h5>
-                <p style="margin-bottom: 8px;">Clasificación de los documentos según la rigurosidad e intención metodológica del estudio:</p>
-                • <b>Article (Artículo de Revista):</b> Investigaciones maduras, revisadas por pares y con validaciones matemáticas extensas. Ideal para sustentar metodologías robustas.<br>
-                • <b>Conference Paper (Actas de Congresos):</b> Tecnologías disruptivas y algoritmos emergentes de última generación que se exponen rápidamente en la industria tecnológica.<br>
-                • <b>Book / Book Chapter:</b> Compendios teóricos y marcos de trabajo globales útiles para estructurar la gobernanza de datos a nivel corporativo.
+            <div class="glossary-wrapper">
+                <div class="chart-glossary">
+                    <h5 style="color: #FFFF00 !important; margin-top: 0; margin-bottom: 10px;">📊 Tipos de Documentación Científica</h5>
+                    <p style="margin-bottom: 8px;">Clasificación de los documentos según la rigurosidad e intención metodológica del estudio:</p>
+                    • <b>Article (Artículo de Revista):</b> Investigaciones maduras, revisadas por pares y con validaciones matemáticas extensas. Ideal para sustentar metodologías robustas.<br>
+                    • <b>Conference Paper (Actas de Congresos):</b> Tecnologías de última generación expuestas rápidamente en la industria tecnológica.<br>
+                    • <b>Book / Book Chapter:</b> Compendios teóricos globales útiles para estructurar la gobernanza de datos a nivel corporativo.
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -280,7 +289,7 @@ def main():
         st.markdown("### 📈 Evolución Histórica de Dimensiones Críticas de Entrada")
         
         if len(df_filtrado) > 0:
-            col_g4_izq, col_g4_der = st.columns([1.2, 0.8])
+            col_g4_izq, col_g4_der = st.columns([1, 1])
             
             with col_g4_izq:
                 text_comb = df_filtrado['Abstract_Clean'] + " " + df_filtrado['Title'].str.lower()
@@ -294,38 +303,23 @@ def main():
                 df_melted = df_trends_grouped.melt(id_vars='Año', var_name='Dimensión Crítica', value_name='Cantidad de Investigaciones')
                 
                 fig_line = px.line(
-                    df_melted, 
-                    x="Año", 
-                    y="Cantidad de Investigaciones", 
-                    color="Dimensión Crítica",
-                    color_discrete_map={
-                        "📱 Transacciones e Interactividad": "#00CED1", 
-                        "💳 Historial Crediticio (SBS)": "#FF1493", 
-                        "👤 Datos Demográficos y Perfil": "#FFFF00"
-                    },
-                    template="plotly_dark", 
-                    markers=True,
-                    labels={"Cantidad de Investigaciones": "Número de Papers Publicados", "Año": "Línea de Tiempo (Años)"}
+                    df_melted, x="Año", y="Cantidad de Investigaciones", color="Dimensión Crítica",
+                    color_discrete_map={"📱 Transacciones e Interactividad": "#00CED1", "💳 Historial Crediticio (SBS)": "#FF1493", "👤 Datos Demográficos y Perfil": "#FFFF00"},
+                    template="plotly_dark", markers=True, labels={"Cantidad de Investigaciones": "Número de Papers", "Año": "Año"}
                 )
-                
-                fig_line.update_layout(
-                    paper_bgcolor='rgba(0,0,0,0)', 
-                    plot_bgcolor='rgba(0,0,0,0)', 
-                    hovermode="closest",
-                    margin=dict(l=10, r=10, t=15, b=10),
-                    legend=dict(orientation="h", yanchor="top", y=-0.18, xanchor="center", x=0.5)
-                )
+                fig_line.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=10, b=0), height=340, legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5))
                 st.plotly_chart(fig_line, use_container_width=True)
                 
             with col_g4_der:
-                st.markdown("<br>", unsafe_allow_html=True)
                 st.markdown("""
-                <div class="chart-glossary">
-                    <h5 style="color: #00CED1 !important; margin-top: 0; margin-bottom: 10px;">📉 Análisis de Variables Críticas (Inputs)</h5>
-                    <p style="margin-bottom: 8px;">Este análisis predictivo de líneas de tendencia evalúa el nivel de atención que la ciencia otorga a los pilares de comportamiento financiero:</p>
-                    • <b>📱 Transacciones:</b> Mide la frecuencia de uso en ecosistemas móviles (Yape/Plin) y canales web. Es el indicador más rápido para detectar desinterés.<br>
-                    • <b>💳 Historial Crediticio (SBS):</b> Variaciones en el score de sobreendeudamiento externo. Detecta si el usuario busca sustitutos financieros.<br>
-                    • <b>👤 Datos Demográficos:</b> Variables estructurales base (ingresos, edad, geolocalización) para la segmentación de riesgo.
+                <div class="glossary-wrapper">
+                    <div class="chart-glossary">
+                        <h5 style="color: #00CED1 !important; margin-top: 0; margin-bottom: 10px;">📉 Análisis de Variables Críticas (Inputs)</h5>
+                        <p style="margin-bottom: 8px;">Este análisis predictivo de líneas de tendencia evalúa el nivel de atención que la ciencia otorga a los pilares de comportamiento financiero:</p>
+                        • <b>📱 Transacciones:</b> Mide la frecuencia de uso en ecosistemas móviles (Yape/Plin). Es el indicador más rápido para detectar desinterés.<br>
+                        • <b>💳 Historial Crediticio (SBS):</b> Variaciones en el score de sobreendeudamiento externo. Detecta si el usuario busca sustitutos financieros.<br>
+                        • <b>👤 Datos Demográficos:</b> Variables estructurales base (ingresos, edad) para la segmentación de riesgo.
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -335,55 +329,47 @@ def main():
         st.markdown("### 📊 Distribución de Madurez e Impacto Científico por Año")
         
         if len(df_filtrado) > 0:
-            col_g5_izq, col_g5_der = st.columns([1.2, 0.8])
+            col_g5_izq, col_g5_der = st.columns([1, 1])
             
             with col_g5_izq:
                 fig_violin = px.violin(
-                    df_filtrado, 
-                    x="Year", 
-                    y="Cited by", 
-                    box=True, 
-                    points="all", 
-                    template="plotly_dark", 
-                    color_discrete_sequence=["#00CED1"],
-                    labels={"Year": "Año de Publicación", "Cited by": "Volumen de Citas Recibidas (Scopus)"}
+                    df_filtrado, x="Year", y="Cited by", box=True, points="all", 
+                    template="plotly_dark", color_discrete_sequence=["#00CED1"],
+                    labels={"Year": "Año de Publicación", "Cited by": "Citas Recibidas (Scopus)"}
                 )
-                fig_violin.update_layout(
-                    paper_bgcolor='rgba(0,0,0,0)', 
-                    plot_bgcolor='rgba(0,0,0,0)', 
-                    margin=dict(l=10, r=10, t=15, b=10)
-                )
+                fig_violin.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=10, b=0), height=340)
                 st.plotly_chart(fig_violin, use_container_width=True)
                 
             with col_g5_der:
-                st.markdown("<br>", unsafe_allow_html=True)
                 st.markdown("""
-                <div class="chart-glossary">
-                    <h5 style="color: #FF1493 !important; margin-top: 0; margin-bottom: 10px;">🛡️ Interpretación de Impacto Bibliométrico</h5>
-                    <p style="margin-bottom: 8px;">Analiza la dispersión, consistencia y madurez del respaldo algorítmico a lo largo del tiempo:</p>
-                    • <b>Eje Vertical (Citas Scopus):</b> Cuantifica el nivel de réplica y validación internacional que sostiene cada metodología.<br>
-                    • <b>Densidad del Gráfico:</b> Las zonas más anchas muestran las tendencias donde la industria consolidó estándares homogéneos.<br>
-                    • <b>Puntos Aislados (Outliers):</b> Representan papers pilar de la analítica de Churn, ideales para auditorías de alta exigencia técnica.
+                <div class="glossary-wrapper">
+                    <div class="chart-glossary">
+                        <h5 style="color: #FF1493 !important; margin-top: 0; margin-bottom: 10px;">🛡️ Interpretación de Impacto Bibliométrico</h5>
+                        <p style="margin-bottom: 8px;">Analiza la dispersión, consistencia y madurez del respaldo algorítmico a lo largo del tiempo:</p>
+                        • <b>Eje Vertical (Citas Scopus):</b> Cuantifica el nivel de réplica y validación internacional que sostiene cada metodología.<br>
+                        • <b>Densidad del Gráfico:</b> Las zonas más anchas muestran las tendencias donde la industria consolidó estándares homogéneos.<br>
+                        • <b>Puntos Aislados (Outliers):</b> Representan papers pilar de la analítica de Churn, ideales para auditorías de alta exigencia técnica.
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
         else:
-            st.caption("Sin datos suficientes para generar la curva de madurez.")
+            st.caption("Sin datos suficientes.")
 
     # =========================================================================
     # PESTAÑA 2: SIMULADOR FINANCIERO PERÚ
     # =========================================================================
     with tab2:
         st.markdown("### 🔮 Motor de Simulación de Riesgo Bancario Local")
-        st.info(f"🔗 **Estatus del Motor:** Sincronizado de forma activa con {len(df_filtrado)} papers científicos indexados en Scopus. "
-                f"Distribución de coeficientes en tiempo real: 📱 Digital: {peso_trans*100:.1f}% | 💳 Crédito: {peso_score*100:.1f}% | 👤 Perfil: {peso_demo*100:.1f}%")
+        st.info(f"🔗 **Estatus del Motor:** Sincronizado con {len(df_filtrado)} papers de Scopus. "
+                f"Distribución de coeficientes: 📱 Digital: {peso_trans*100:.1f}% | 💳 Crédito: {peso_score*100:.1f}% | 👤 Perfil: {peso_demo*100:.1f}%")
         
         col_sim1, col_sim2 = st.columns(2)
         with col_sim1:
             st.markdown("#### ⚙️ Entrada del Perfil Transaccional")
             banco_seleccionado = st.selectbox("Selecciona la entidad a evaluar dentro del ecosistema nacional:", ["Banco de Crédito del Perú (BCP)", "BBVA Perú", "Interbank", "Scotiabank Perú"])
-            caida_trans = st.slider("1. Contracción mensual en canales de pago móviles (Yape / Plin, transferencias interbancarias CCE) (%):", 0, 100, 30)
-            score_sbs = st.slider("2. Calificación del Score Crediticio interno del usuario (Sentinel / SBS / Equifax):", 300, 850, 710)
-            portabilidad_sueldo = st.radio("3. ¿Registra alertas de portabilidad de Cuenta Sueldo o retiro del fondo de CTS?", ["No", "Sí"])
+            caida_trans = st.slider("1. Contracción mensual en canales de pago móviles (Yape / Plin) (%):", 0, 100, 30)
+            score_sbs = st.slider("2. Calificación del Score Crediticio interno (Sentinel / SBS / Equifax):", 300, 850, 710)
+            portabilidad_sueldo = st.radio("3. ¿Registra alertas de portabilidad de Cuenta Sueldo o retiro de CTS?", ["No", "Sí"])
             
             score_ponderado = 12.0 + (caida_trans * (peso_trans * 1.2)) + ((850 - score_sbs) * (peso_score * 0.15))
             if portabilidad_sueldo == "Sí": score_ponderado += (28.0 * (peso_demo + 0.4))
@@ -402,11 +388,11 @@ def main():
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("#### 📋 Plan de Acción Táctico de Retención")
             if riesgo_final < 40:
-                st.success("🟢 **Zona Segura:** El cliente se mantiene fidelizado. Desplegar campaigns pasivas de cross-selling (Millas LATAM Pass, Puntos BBVA o Beneficios Interbank Benefit).")
+                st.success("🟢 **Zona Segura:** El cliente se mantiene fidelizado. Desplegar campañas pasivas de cross-selling (Millas/Puntos de beneficios).")
             elif 40 <= riesgo_final < 70:
-                st.warning("🟡 **Retención Preventiva:** Descenso inusual de actividad digital. El sistema recomienda la exoneración proactiva de la membresía anual o la habilitación de una campaña preferencial de compra de deuda externa.")
+                st.warning("🟡 **Retención Preventiva:** Descenso inusual de actividad digital. Se recomienda la exoneración proactiva de membresías o habilitación de compra de deuda preferencial.")
             else:
-                st.error("🔴 **Intervención Inmediata / Alerta Crítica:** Fuga inminente de haberes. El protocolo bancario exige asignar el caso de forma prioritario a un asesor Élite de telemarketing.")
+                st.error("🔴 **Intervención Inmediata / Alerta Crítica:** Fuga inminente. El protocolo exige asignar el caso de forma prioritaria a un asesor Élite de retención.")
 
     # =========================================================================
     # PESTAÑA 3: CENTRO DE DATOS
@@ -422,7 +408,7 @@ def main():
         
         st.markdown("---")
         
-        st.markdown("#### 🏆 Top 3 Papers Más Citados (Estructura de Tarjetas Advanced)")
+        st.markdown("#### 🏆 Top 3 Papers Más Citados")
         top_papers = df_filtrado.sort_values(by="Cited by", ascending=False).head(3)
         
         if len(top_papers) > 0:
@@ -440,12 +426,12 @@ def main():
                     """, unsafe_allow_html=True)
                     st.metric(label="Total de Citas en Scopus", value=int(row['Cited by']))
         else:
-            st.warning("⚠️ No se registran publicaciones que cumplan con los criterios mínimos de citas establecidos en los filtros.")
+            st.warning("⚠️ No se registran publicaciones que cumplan con los criterios mínimos de citas.")
 
         st.markdown("---")
         
-        st.markdown("#### 🗂️ Data Lake Completo (Filtrado Inteligente e Interactividad Activa)")
-        st.markdown("💡 *Haz clic en cualquier fila para auditar detalles, o presiona el icono de enlace en la columna de la derecha para abrir el artículo original.*")
+        st.markdown("#### 🗂️ Data Lake Completo (Interactividad Activa)")
+        st.markdown("💡 *Haz clic en cualquier fila para auditar detalles, o presiona el icono de enlace en la columna de la derecha para abrir la fuente.*")
 
         df_lake = df_filtrado[["Title", "Year", "Cited by", "Source title", "Abstract", "Link"]].sort_values(by="Cited by", ascending=False).reset_index(drop=True)
         
@@ -478,7 +464,7 @@ def main():
             
             st.markdown(f"""
             <div class="detail-box">
-                <span style="color: #FF1493; font-weight: bold; font-size: 0.85rem; letter-spacing: 1px;">📋 AUDITORÍA AVANZADA DEL DOCUMENTO SELECCIONADO</span>
+                <span style="color: #FF1493; font-weight: bold; font-size: 0.85rem; letter-spacing: 1px;">📋 AUDITORÍA AVANZADA DEL DOCUMENTO SELECONADO</span>
                 <h3 style="margin-top: 10px; color: #FFF !important;">{paper_sel['Title']}</h3>
                 <p style="color: #8B949E; font-size: 0.9rem;"><b>Publicado en:</b> {paper_sel['Source title']} ({paper_sel['Year']})  |  <b>Impacto:</b> {paper_sel['Cited by']} citas.</p>
                 <hr style="border-color: #21262D;">
@@ -495,7 +481,7 @@ def main():
             with col_p3:
                 st.metric(label="👤 Afinidad Demográfica (Perfil)", value=f"{p_d:.1f}%")
         else:
-            st.info("💡 **Tip Ejecutivo:** Para ver el Abstract, porcentajes de afinidad y análisis detallado de cualquier paper, haz un clic sobre su fila en el cuadro de arriba.")
+            st.info("💡 **Tip Ejecutivo:** Selecciona una fila de la tabla para abrir el inspector avanzado con el desglose del Abstract de forma inmediata.")
 
 if __name__ == "__main__":
     main()
