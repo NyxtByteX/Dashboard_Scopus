@@ -1,10 +1,3 @@
-Aquí tienes el código completo, limpio y optimizado para producción en **Streamlit**.
-
-He integrado las nuevas lógicas analíticas de forma armónica dentro de la arquitectura visual oscura y ejecutiva (*Estilo Geckoboard*). He añadido el **Gráfico de Pastel de Rigor Metodológico**, el **Top de Conceptos de Riesgo Financiero más detectados** y el **Inspector de Calidad de Metadata (Acordeón)** en la pestaña del Data Lake.
-
-### 🔮 Código Completo Optimizado: `app.py`
-
-```python
 import streamlit as st
 import pandas as pd
 import plotly.express as px
