@@ -1,137 +1,135 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from collections import Counter
 
-# 1. Configuración de apariencia profesional (Tema corporativo)
-st.set_page_config(page_title="Bank Churn Intelligence Hub", page_icon="🏦", layout="wide")
+# 1. Configuración de página a pantalla completa
+st.set_page_config(page_title="Bank Churn AI Explorer", page_icon="🏦", layout="wide", initial_sidebar_state="expanded")
 
-# 2. AUTOMATIZACIÓN: El sistema lee el archivo directamente (¡Sin widgets de carga!)
+# 2. Carga automática del archivo (sin que el usuario haga nada)
 @st.cache_data
 def load_bank_data():
-    # Lee el archivo scopus_PA3.csv que estará guardado en tu mismo GitHub
     df = pd.read_csv('scopus_PA3.csv')
     df['Cited by'] = df['Cited by'].fillna(0)
-    df['Year'] = df['Year'].fillna(2025)
+    df['Year'] = df['Year'].fillna(2025).astype(int)
     return df
 
 def main():
-    # Intentar cargar los datos automáticamente
     try:
         df = load_bank_data()
-    except FileNotFoundError:
-        st.error("🚨 Error crítico: No se encontró el archivo 'scopus_PA3.csv' en la carpeta.")
+    except:
+        st.error("🚨 Sube tu archivo scopus_PA3.csv a GitHub primero.")
         return
 
-    # --- BANNER PRINCIPAL (Enfoque de Negocios) ---
-    st.title("🏦 Portal de Inteligencia: Mitigación de Churn Bancario")
-    st.markdown("""
-    **Audiencia:** Equipo de Analytics, Riesgos y Retención de Clientes.  
-    *Este dashboard consolida la evidencia científica de los últimos estudios (2025-2026) para identificar los algoritmos y estrategias más eficientes del mercado para predecir la fuga de clientes.*
-    """)
-    st.divider()
+    # --- BARRA LATERAL: EL CONTROL REMOTO DEL USUARIO ---
+    st.sidebar.image("https://cdn-icons-png.flaticon.com/512/2830/2830284.png", width=80)
+    st.sidebar.title("🕹️ Panel de Control")
+    st.sidebar.markdown("Juega con los filtros para descubrir insights.")
 
-    # --- METRICAS CLAVE PARA EL NEGOCIO ---
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric(label="📊 Modelos/Casos Analizados", value=len(df))
-    with col2:
-        # Contamos cuántas investigaciones mencionan validación o alto impacto
-        st.metric(label="🔥 Respaldo Científico (Citas Totales)", value=int(df['Cited by'].sum()))
-    with col3:
-        # Revistas de finanzas o tecnología involucradas
-        st.metric(label="🏢 Fuentes/Revistas Especializadas", value=df['Source title'].nunique())
-    with col4:
-        st.metric(label="📅 Horizonte Temporal", value="2025 - 2026")
+    # Filtro 1: Rango de años
+    min_yr, max_yr = int(df['Year'].min()), int(df['Year'].max())
+    rango_anios = st.sidebar.slider("📅 Selecciona el periodo:", min_yr, max_yr, (min_yr, max_yr))
+
+    # Filtro 2: Nivel de impacto (Citas)
+    min_citas = st.sidebar.slider("🔥 Mínimo de citas del artículo:", 0, int(df['Cited by'].max()), 0)
+
+    # Filtro 3: Buscador interactivo
+    palabra_clave = st.sidebar.text_input("🔍 Buscar tema (ej. Random Forest, SHAP):", "")
+
+    # APLICAR FILTROS
+    df_filtrado = df[(df['Year'] >= rango_anios[0]) & (df['Year'] <= rango_anios[1])]
+    df_filtrado = df_filtrado[df_filtrado['Cited by'] >= min_citas]
+    if palabra_clave:
+        df_filtrado = df_filtrado[df_filtrado['Abstract'].fillna('').str.contains(palabra_clave, case=False) | 
+                                  df_filtrado['Title'].fillna('').str.contains(palabra_clave, case=False)]
+
+    # --- ENCABEZADO ---
+    st.title("🏦 Explorador de IA para Mitigar Fuga de Clientes (Churn)")
+    
+    # --- KPIs VISUALES ---
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("📚 Artículos Encontrados", len(df_filtrado))
+    c2.metric("⭐ Citas Totales", int(df_filtrado['Cited by'].sum()))
+    c3.metric("🏆 Máximo de Citas en un Paper", int(df_filtrado['Cited by'].max()))
+    c4.metric("🏢 Revistas Especializadas", df_filtrado['Source title'].nunique())
     
     st.divider()
 
-    # --- PESTAÑAS ESTRATÉGICAS ---
-    tab1, tab2, tab3 = st.tabs([
-        "🤖 Consenso Tecnológico (Modelos ML)", 
-        "🔍 Buscador de Casos y Soluciones Bancarias", 
-        "📈 Impacto de la Investigación"
-    ])
+    # Si no hay datos tras filtrar, avisar visualmente
+    if df_filtrado.empty:
+        st.warning("⚠️ No hay artículos que coincidan con tus filtros. Prueba ajustándolos en el panel izquierdo.")
+        return
 
-    # PESTAÑA 1: CONSENSO TECNOLÓGICO (Útil para el equipo de Data Science del banco)
-    with tab1:
-        st.subheader("💡 ¿Qué modelos de Machine Learning recomiendan los expertos?")
-        st.markdown("Análisis semántico automatizado de los algoritmos más exitosos mencionados en los abstracts:")
+    # --- FILA 1 DE GRÁFICOS: BURBUJAS Y MAPA DE PALABRAS ---
+    st.markdown("### 🔭 Panorama de la Investigación")
+    colA, colB = st.columns(2)
 
-        # Mapeo inteligente de algoritmos dentro de tu archivo de Scopus
-        texto_completo = df['Abstract'].fillna('').str.lower() + ' ' + df['Author Keywords'].fillna('').str.lower()
-        
-        lista_algoritmos = ['Random Forest', 'SHAP (Interpretable ML)', 'XGBoost', 'Neural Networks (Redes Neuronales)', 'SVM', 'Decision Tree']
-        conteos = []
-        for alg in lista_algoritmos:
-            # Simplificar término para la búsqueda
-            termino_busqueda = alg.split('(')[0].strip().lower()
-            cantidad = texto_completo.str.contains(termino_busqueda).sum()
-            conteos.append({'Algoritmo': alg, 'Investigaciones que lo validan': cantidad})
-        
-        df_alg = pd.DataFrame(conteos).sort_values(by='Investigaciones que lo validan', ascending=False)
-
-        col_graf, col_txt = st.columns([2, 1])
-        with col_graf:
-            fig_alg = px.bar(df_alg, x='Investigaciones que lo validan', y='Algoritmo', orientation='h',
-                             color='Investigaciones que lo validan', color_continuous_scale='Blues',
-                             title="Modelos de IA con Mayor Tasa de Éxito en Banca")
-            st.plotly_chart(fig_alg, use_container_width=True)
-        
-        with col_txt:
-            st.markdown("##### 📌 Conclusión para el Banco:")
-            st.info("""
-            Si el banco busca implementar un modelo inmediato:
-            1. **Random Forest y XGBoost** son los más recomendados por la literatura por su precisión con datos tabulares de clientes.
-            2. El uso de **SHAP** se ha vuelto obligatorio en 2025/2026 para que el área legal y de riesgos entienda *por qué* la IA dice que un cliente se va a ir.
-            """)
-
-    # PESTAÑA 2: BUSCADOR DE CASOS (Útil para un Gerente de Retención)
-    with tab2:
-        st.subheader("🔍 Biblioteca de Soluciones y Metodologías Antifuga")
-        st.markdown("Usa el buscador para filtrar resúmenes científicos según palabras clave del negocio (ej. *credit card*, *behavioral*, *predicting*, *interpretable*).")
-        
-        busqueda = st.text_input("⌨️ Introduce un término de negocio (en inglés preferiblemente por Scopus):", "interpretable")
-        
-        # Filtrado dinámico por texto
-        df_resultados = df[
-            df['Title'].fillna('').str.lower().str.contains(busqueda.lower()) | 
-            df['Abstract'].fillna('').str.lower().str.contains(busqueda.lower())
-        ]
-        
-        st.caption(f"Se encontraron {len(df_resultados)} papers que resuelven este problema específico.")
-        
-        # Mostrar los resultados limpios para lectura ejecutiva
-        for idx, row in df_resultados.head(5).iterrows():
-            with st.expander(f"📌 {row['Title']} ({row['Year']})"):
-                st.write(f"**Autores:** {row['Authors']}")
-                st.write(f"**Revista:** {row['Source title']}")
-                st.write(f"**Resumen Técnico (Abstract):** {row['Abstract']}")
-                if 'Link' in df.columns:
-                    st.write(f"[🔗 Ver paper original en Scopus]({row['Link']})")
-
-    # PESTAÑA 3: ANALISIS DE IMPACTO
-    with tab3:
-        st.subheader("📈 Análisis de Impacto y Validación de Fuentes")
-        colA, colB = st.columns(2)
-        
-        with colA:
-            # Artículos con más citas (los que tienen metodologías más confiables)
-            df_citas = df.sort_values(by='Cited by', ascending=False).head(5)
-            df_citas['Título Corto'] = df_citas['Title'].str[:40] + "..."
-            fig_citas = px.bar(df_citas, x='Cited by', y='Título Corto', orientation='h',
-                               title="Top 5 Metodologías más Validadas (Más Citadas)",
-                               color='Cited by', color_continuous_scale='Greens')
-            fig_citas.update_layout(yaxis={'categoryorder':'total ascending'})
-            st.plotly_chart(fig_citas, use_container_width=True)
+    with colA:
+        # Gráfico 1: Treemap de Palabras Clave (Super dinámico)
+        if 'Author Keywords' in df_filtrado.columns:
+            # Procesar las palabras clave
+            kws = df_filtrado['Author Keywords'].dropna().str.split(';')
+            lista_kws = [k.strip().title() for sub in kws for k in sub]
+            conteo_kws = pd.DataFrame(Counter(lista_kws).most_common(20), columns=['Concepto', 'Frecuencia'])
             
-        with colB:
-            # Dónde se publica más esto
-            df_source = df['Source title'].value_counts().head(5).reset_index()
-            df_source.columns = ['Revista', 'Cantidad']
-            fig_source = px.pie(df_source, values='Cantidad', names='Revista', 
-                                title="¿De dónde provienen estas soluciones?", hole=0.4,
-                                color_discrete_sequence=px.colors.sequential.YlGnBu)
-            st.plotly_chart(fig_source, use_container_width=True)
+            fig_tree = px.treemap(conteo_kws, path=['Concepto'], values='Frecuencia',
+                                  title="Conceptos y Algoritmos Más Estudiados (Treemap)",
+                                  color='Frecuencia', color_continuous_scale='Teal')
+            st.plotly_chart(fig_tree, use_container_width=True)
+
+    with colB:
+        # Gráfico 2: Gráfico de Burbujas (Citas vs Año)
+        fig_bubble = px.scatter(df_filtrado, x="Year", y="Cited by", size="Cited by", color="Source title",
+                                hover_name="Title", size_max=45,
+                                title="Impacto de los Artículos (El tamaño es el nº de citas)")
+        
+        # Ajustamos el eje X para que los años se vean enteros (2025, 2026)
+        fig_bubble.update_layout(xaxis=dict(tickformat="d"))
+        st.plotly_chart(fig_bubble, use_container_width=True)
+
+    # --- FILA 2 DE GRÁFICOS: TENDENCIAS Y TOP REVISTAS ---
+    st.markdown("### 🏆 Liderazgo Científico")
+    colC, colD = st.columns([1.5, 1])
+
+    with colC:
+        # Gráfico 3: Barras Horizontales Top Papers
+        df_top = df_filtrado.sort_values('Cited by', ascending=False).head(7)
+        df_top['Título'] = df_top['Title'].str[:50] + "..."
+        fig_bar = px.bar(df_top, x='Cited by', y='Título', orientation='h', 
+                         color='Cited by', color_continuous_scale='Inferno',
+                         title="Los 7 Artículos Más Influyentes (Por Citas)",
+                         hover_data=['Authors', 'Year'])
+        fig_bar.update_layout(yaxis={'categoryorder':'total ascending'})
+        st.plotly_chart(fig_bar, use_container_width=True)
+
+    with colD:
+        # Gráfico 4: Gráfico de Anillo
+        top_revistas = df_filtrado['Source title'].value_counts().head(5).reset_index()
+        top_revistas.columns = ['Revista', 'Artículos']
+        fig_donut = px.pie(top_revistas, values='Artículos', names='Revista', hole=0.5,
+                           title="Top 5 Revistas", color_discrete_sequence=px.colors.sequential.Agal)
+        fig_donut.update_traces(textposition='inside', textinfo='percent')
+        st.plotly_chart(fig_donut, use_container_width=True)
+
+    # --- SECCIÓN INTERACTIVA FINAL: EXPLORADOR DE DATOS ---
+    st.divider()
+    st.markdown("### 🗄️ Base de Datos Interactiva")
+    st.markdown("Haz clic en cualquier columna para ordenar los datos.")
+    
+    # Mostramos una tabla limpia y bonita
+    columnas_mostrar = ['Year', 'Title', 'Authors', 'Source title', 'Cited by', 'Link']
+    columnas_existentes = [c for c in columnas_mostrar if c in df_filtrado.columns]
+    
+    st.dataframe(
+        df_filtrado[columnas_existentes],
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Year": st.column_config.NumberColumn("Año", format="%d"),
+            "Cited by": st.column_config.NumberColumn("Citas"),
+            "Link": st.column_config.LinkColumn("Enlace a Scopus")
+        }
+    )
 
 if __name__ == "__main__":
     main()
