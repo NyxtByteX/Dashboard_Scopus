@@ -145,7 +145,7 @@ def main():
 
         with colD:
             st.subheader("🧩 Ingredientes del Modelo (Features)")
-            st.markdown("¿Qué datos de los clientes "comen" estos algoritmos para aprender?")
+            st.markdown('¿Qué datos de los clientes "comen" estos algoritmos para aprender?')
             
             features_data = [
                 {'Categoria': 'Transacciones', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('transaction|behavio').sum(), 'Desc': 'Frecuencia de uso, montos gastados.'},
