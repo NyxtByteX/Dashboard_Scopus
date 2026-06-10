@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import urllib.parse
 
 # --- 1. CONFIGURACIÓN DEL ENTORNO EMPRESARIAL ---
 st.set_page_config(
@@ -79,6 +80,9 @@ def load_and_process_data():
     df['Year'] = df['Year'].fillna(2025).astype(int)
     df['Abstract'] = df['Abstract'].fillna('No abstract available.')
     df['Abstract_Clean'] = df['Abstract'].str.lower()
+    
+    # Generar URL dinámica de búsqueda en Google Scholar usando el título del artículo
+    df['Link'] = df['Title'].apply(lambda x: f"https://scholar.google.com/scholar?q={urllib.parse.quote(x)}")
     return df
 
 def main():
@@ -88,20 +92,18 @@ def main():
         st.error("🚨 Error crítico: No se encontró la base de datos de Scopus 'scopus_PA3.csv' en la raíz.")
         return
 
-    # --- BARRA LATERAL REDISEÑADA (Panel de Control y Auditoría de Negocio) ---
+    # --- BARRA LATERAL (Panel de Control y Auditoría de Negocio) ---
     with st.sidebar:
         st.image("https://cdn-icons-png.flaticon.com/512/2103/2103832.png", width=50)
         st.title("Auditoría de Modelos")
         st.markdown("Configura el alcance técnico y el nivel de validación comercial para el ecosistema predictivo.")
         st.markdown("---")
         
-        # Cambio 1: De buscador abierto a filtro estratégico por tipo de Algoritmo/Core de IA
         categoria_ia = st.selectbox(
             "⚙️ Arquitectura del Modelo de IA:",
             options=["Todos los Modelos", "Redes Neuronales / Deep Learning", "Árboles de Decisión / XGBoost", "Regresión Logística / Scoring Tradicional"]
         )
         
-        # Mapeo lógico interno del filtro seleccionado
         busqueda = ""
         if categoria_ia == "Redes Neuronales / Deep Learning":
             busqueda = "neural|deep learning"
@@ -110,7 +112,6 @@ def main():
         elif categoria_ia == "Regresión Logística / Scoring Tradicional":
             busqueda = "logistic|regression|statistical"
             
-        # Cambio 2: Traducir "Citas" a Madurez y Respaldo de la Industria
         max_citas_posibles = int(df['Cited by'].max()) if len(df) > 0 else 100
         min_citas = st.slider(
             "🛡️ Grado de Respaldo e Impacto en la Industria (Citas Mínimas):", 
@@ -287,7 +288,7 @@ def main():
                 st.error("🔴 **Intervención Inmediata / Alerta Crítica:** Fuga inminente de haberes. El protocolo bancario exige asignar el caso de forma prioritaria a un asesor Élite de telemarketing.")
 
     # =========================================================================
-    # PESTAÑA 3: CENTRO DE DATOS (RESTAURADA E INTERACTIVA)
+    # PESTAÑA 3: CENTRO DE DATOS (RESTAURADA E INTERACTIVA CON ENLACES)
     # =========================================================================
     with tab3:
         st.markdown("### 📚 Centro de Inteligencia y Auditoría Bibliométrica")
@@ -316,14 +317,14 @@ def main():
 
         st.markdown("---")
         
-        # Data Lake Interactivo
+        # Data Lake Interactivo con Enlaces Activos
         st.markdown("#### 🗂️ Data Lake Completo (Filtrado Inteligente e Interactividad Activa)")
-        st.markdown("💡 *Haz clic en cualquier fila del cuadro inferior para auditar sus métricas de afinidad algorítmica, ver su abstract completo y analizar sus porcentajes.*")
+        st.markdown("💡 *Haz clic en cualquier fila para auditar detalles, o presiona el icono de enlace en la columna de la derecha para abrir el artículo original.*")
 
-        df_lake = df_filtrado[["Title", "Year", "Cited by", "Source title", "Abstract"]].sort_values(by="Cited by", ascending=False).reset_index(drop=True)
+        df_lake = df_filtrado[["Title", "Year", "Cited by", "Source title", "Abstract", "Link"]].sort_values(by="Cited by", ascending=False).reset_index(drop=True)
         
         seleccion = st.dataframe(
-            df_lake[["Title", "Year", "Cited by", "Source title"]],
+            df_lake[["Title", "Year", "Cited by", "Source title", "Link"]],
             use_container_width=True,
             hide_index=True,
             selection_mode="single-row",
@@ -332,7 +333,8 @@ def main():
                 "Title": st.column_config.TextColumn("Título del Estudio Científico"),
                 "Year": st.column_config.NumberColumn("Año", format="%d"),
                 "Cited by": st.column_config.NumberColumn("Citas Scopus"),
-                "Source title": st.column_config.TextColumn("Revista / Journal")
+                "Source title": st.column_config.TextColumn("Revista / Journal"),
+                "Link": st.column_config.LinkColumn("🔗 Fuente Externa", display_text="Ver Documento")
             }
         )
 
