@@ -1,8 +1,3 @@
-Aquí tienes el código completo y listo para producción. He reestructurado toda la **Pestaña 1** aplicando un diseño de **columnas asimétricas (`[1.2, 0.8]`)**.
-
-Ahora, cada uno de los gráficos principales (barras y dona) tiene su bloque explicativo integrado de manera nativa al costado derecho, eliminando por completo los espacios vacíos y dándole al dashboard un look ejecutivo impecable.
-
-```python
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -393,11 +388,11 @@ def main():
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("#### 📋 Plan de Acción Táctico de Retención")
             if riesgo_final < 40:
-                st.success("🟢 **Zona Segura:** El cliente se mantiene fidelizado. Desplegar campañas pasivas de cross-selling (Millas LATAM Pass, Puntos BBVA o Beneficios Interbank Benefit).")
+                st.success("🟢 **Zona Segura:** El cliente se mantiene fidelizado. Desplegar campaigns pasivas de cross-selling (Millas LATAM Pass, Puntos BBVA o Beneficios Interbank Benefit).")
             elif 40 <= riesgo_final < 70:
                 st.warning("🟡 **Retención Preventiva:** Descenso inusual de actividad digital. El sistema recomienda la exoneración proactiva de la membresía anual o la habilitación de una campaña preferencial de compra de deuda externa.")
             else:
-                st.error("🔴 **Intervención Inmediata / Alerta Crítica:** Fuga inminente de haberes. El protocolo bancario exige asignar el caso de forma prioritaria a un asesor Élite de telemarketing.")
+                st.error("🔴 **Intervención Inmediata / Alerta Crítica:** Fuga inminente de haberes. El protocolo bancario exige asignar el caso de forma prioritario a un asesor Élite de telemarketing.")
 
     # =========================================================================
     # PESTAÑA 3: CENTRO DE DATOS
