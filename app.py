@@ -248,12 +248,34 @@ def main():
                 markers=True,
                 labels={"Cantidad de Investigaciones": "Número de Papers Publicados", "Año": "Línea de Tiempo (Años)"}
             )
+fig_line = px.line(
+                df_melted, 
+                x="Año", 
+                y="Cantidad de Investigaciones", 
+                color="Dimensión Crítica",
+                color_discrete_map={
+                    "📱 Transacciones e Interactividad": "#00CED1", 
+                    "💳 Historial Crediticio (SBS)": "#FF1493", 
+                    "👤 Datos Demográficos y Perfil": "#FFFF00"
+                },
+                template="plotly_dark", 
+                markers=True,
+                labels={"Cantidad de Investigaciones": "Número de Papers Publicados", "Año": "Línea de Tiempo (Años)"}
+            )
+            
+            # Ajuste de Interacción Individual ("closest") y posición de Leyenda
             fig_line.update_layout(
                 paper_bgcolor='rgba(0,0,0,0)', 
                 plot_bgcolor='rgba(0,0,0,0)', 
-                hovermode="x unified", 
-                margin=dict(l=10, r=10, t=20, b=20),
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                hovermode="closest",  # El secreto: muestra solo el punto exacto seleccionado
+                margin=dict(l=10, r=10, t=30, b=20),
+                legend=dict(
+                    orientation="h",       # Leyenda horizontal
+                    yanchor="top",
+                    y=-0.18,               # Movida abajo del gráfico para que no tape nada
+                    xanchor="center",
+                    x=0.5
+                )
             )
             st.plotly_chart(fig_line, use_container_width=True)
             
