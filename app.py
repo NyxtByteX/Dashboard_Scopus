@@ -205,10 +205,10 @@ def main():
             fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=15, b=10))
             st.plotly_chart(fig_bar, use_container_width=True)
 
-        st.markdown("---") # Línea divisoria elegante para separar secciones
+        st.markdown("---")
 
         # 4. NUEVA DISTRIBUCIÓN - FILA B: ORIGEN DE VALIDACIÓN (CENTRALIZADO Abajo)
-        col_pie_izq, col_pie_centro, col_pie_der = st.columns([0.5, 1, 0.5]) # Usamos columnas laterales vacías para centrar el gráfico
+        col_pie_izq, col_pie_centro, col_pie_der = st.columns([0.5, 1, 0.5])
         with col_pie_centro:
             st.markdown("<h4 style='text-align: center;'>🔬 Origen de Validación Académica (Distribución de Literatura)</h4>", unsafe_allow_html=True)
             if len(df_filtrado) > 0:
@@ -219,9 +219,9 @@ def main():
                 st.caption("Sin datos para segmentar.")
 
         st.markdown("<br><br>", unsafe_allow_html=True)
-st.markdown("---")
+        st.markdown("---")
         
-        # 5. GRÁFICA DE TENDENCIAS CONTINUAS (Ahora en su propia línea a ancho completo)
+        # 5. GRÁFICA DE TENDENCIAS CONTINUAS (A ancho completo, una por línea)
         st.markdown("#### 📈 Evolución Histórica de Dimensiones Críticas de Entrada (Trendline Analysis)")
         if len(df_filtrado) > 0:
             text_comb = df_filtrado['Abstract_Clean'] + " " + df_filtrado['Title'].str.lower()
@@ -248,26 +248,18 @@ st.markdown("---")
                 markers=True,
                 labels={"Cantidad de Investigaciones": "Número de Papers Publicados", "Año": "Línea de Tiempo (Años)"}
             )
-            
-            # Ajuste de Leyenda: Posicionada elegantemente arriba o abajo de forma expandida
             fig_line.update_layout(
                 paper_bgcolor='rgba(0,0,0,0)', 
                 plot_bgcolor='rgba(0,0,0,0)', 
                 hovermode="x unified", 
                 margin=dict(l=10, r=10, t=20, b=20),
-                legend=dict(
-                    orientation="h",
-                    yanchor="bottom",
-                    y=1.02,
-                    xanchor="right",
-                    x=1
-                )
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
             )
             st.plotly_chart(fig_line, use_container_width=True)
             
-        st.markdown("---") # Separador visual entre ambos gráficos masivos
+        st.markdown("---")
 
-        # 6. DISTRIBUCIÓN DE MADUREZ (Ahora en su propia línea a ancho completo)
+        # 6. DISTRIBUCIÓN DE MADUREZ (A ancho completo, una por línea)
         st.markdown("#### 📊 Distribución de Madurez e Impacto Científico por Año")
         if len(df_filtrado) > 0:
             fig_violin = px.violin(
@@ -280,8 +272,6 @@ st.markdown("---")
                 color_discrete_sequence=["#00CED1"],
                 labels={"Year": "Año de Publicación", "Cited by": "Volumen de Citas Recibidas (Scopus)"}
             )
-            
-            # Optimizamos los ejes para que el gráfico de violín/caja no se vea estirado ni distorsionado
             fig_violin.update_layout(
                 paper_bgcolor='rgba(0,0,0,0)', 
                 plot_bgcolor='rgba(0,0,0,0)', 
@@ -290,6 +280,7 @@ st.markdown("---")
             st.plotly_chart(fig_violin, use_container_width=True)
         else:
             st.caption("Sin datos suficientes para generar la curva de madurez.")
+
     # =========================================================================
     # PESTAÑA 2: SIMULADOR FINANCIERO PERÚ
     # =========================================================================
