@@ -3,10 +3,25 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# --- 1. CONFIGURACIÓN ---
-st.set_page_config(page_title="ML Churn Academy", page_icon="🤖", layout="wide", initial_sidebar_state="expanded")
+# --- 1. CONFIGURACIÓN DEL ENTORNO EMPRESARIAL ---
+st.set_page_config(
+    page_title="ChurnAI Analytics Hub", 
+    page_icon="🔮", 
+    layout="wide", 
+    initial_sidebar_state="expanded"
+)
 
-# --- 2. PROCESAMIENTO DE DATOS ---
+# Estilo CSS personalizado para forzar la estética premium Dark Mode & Fuentes limpias
+st.markdown("""
+    <style>
+        .reportview-container { background: #0E1117; }
+        .stMarkdown { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        h1, h2, h3 { color: #00CED1 !important; }
+        div[data-testid="stExpander"] { background-color: #161B22; border: 1px solid #30363D; }
+    </style>
+""", unsafe_allow_html=True)
+
+# --- 2. MOTOR DE PROCESAMIENTO DE DATOS ---
 @st.cache_data
 def load_and_process_data():
     df = pd.read_csv('scopus_PA3.csv')
@@ -20,156 +35,154 @@ def main():
     try:
         df = load_and_process_data()
     except Exception:
-        st.error("🚨 Error: No se encontró la base de datos scopus_PA3.csv en tu GitHub.")
+        st.error("🚨 Error crítico: No se encontró la base de datos de Scopus 'scopus_PA3.csv'.")
         return
 
-    # --- BARRA LATERAL ---
+    # --- BARRA LATERAL: CONTROL DE FILTROS ---
     with st.sidebar:
-        st.image("https://cdn-icons-png.flaticon.com/512/2103/2103832.png", width=60)
-        st.title("⚙️ Filtros")
+        st.image("https://cdn-icons-png.flaticon.com/512/2103/2103832.png", width=50)
+        st.title("Filtros de Control")
+        st.markdown("---")
         
-        busqueda = st.text_input("🔍 Buscar concepto:", "")
-        min_citas = st.slider("📈 Citas mínimas:", 0, int(df['Cited by'].max()), 0)
+        busqueda = st.text_input("🔍 Buscar término técnico:", "")
+        min_citas = st.slider("📈 Nivel de autoridad del estudio (Citas):", 0, int(df['Cited by'].max()), 0)
         
         st.markdown("---")
-        st.info("💡 **Tip:** Usa los filtros para que los gráficos se actualicen en tiempo real.")
+        st.caption("🔒 ChurnAI Enterprise v2.1. Periodo Operativo 2025-2026.")
 
-    # Aplicar filtros
+    # Inyección de filtros a la data analizada
     df_filtrado = df[df['Cited by'] >= min_citas]
     if busqueda:
         df_filtrado = df_filtrado[df_filtrado['Abstract_Clean'].str.contains(busqueda.lower()) | 
                                   df_filtrado['Title'].str.lower().str.contains(busqueda.lower())]
 
-    # --- ENCABEZADO ---
-    st.title("🤖 Predictor de Churn: IA en Banca")
-    st.markdown("*Análisis bibliométrico avanzado. Interactúa con los gráficos para descubrir los secretos de la IA en la retención de clientes.*")
-    st.divider()
+    # --- ENCABEZADO CORPORATIVO DE LA STARTUP ---
+    st.title("🔮 ChurnAI Analytics Hub")
+    st.subheader("Plataforma de Onboarding Técnico para Analistas de Riesgo y Retención Bancaria")
+    
+    # Respuesta directa a la pregunta de investigación integrada en la interfaz
+    st.markdown("""
+    <div style='background-color: #161B22; padding: 20px; border-radius: 8px; border-left: 5px solid #FF1493; margin-bottom: 25px;'>
+        <h4 style='color: #FF1493; margin-top:0;'>📌 PREGUNTA DE ESTRATEGIA CENTRAL (2025-2026)</h4>
+        <p style='color: #E6EDF3; font-size: 1.05rem; line-height: 1.6;'>
+            <b>¿Cómo optimiza el uso de machine learning la predicción de la fuga de clientes (customer churn) en el sector bancario?</b><br>
+            La optimización ocurre al reemplazar modelos estadísticos estáticos por arquitecturas predictivas dinámicas. Esto permite identificar patrones invisibles en el comportamiento transaccional del cliente antes de que decida abandonar la entidad, reduciendo la tasa de deserción mediante alertas tempranas automatizadas.
+        </p>
+        <p style='color: #8B949E; font-size: 0.85rem; margin-bottom: 0;'>
+            <b>Keywords Clave:</b> Machine learning • Customer churn • Banking • Prediction
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # --- PESTAÑAS (TABS) ---
-    tab1, tab2, tab3 = st.tabs([
-        "🧠 1. Algoritmos IA", 
-        "📊 2. Métricas de Evaluación", 
-        "🌍 3. Impacto Global"
-    ])
+    # --- PESTAÑAS OPERATIVAS ---
+    tab1, tab2 = st.tabs(["📊 Simulador de Métricas y Variables", "🧠 Modelos y Evidencia Científica"])
 
     # =========================================================================
-    # PESTAÑA 1: ALGORITMOS
+    # PESTAÑA 1: GRÁFICOS SOLICITADOS CON INTERACCIÓN AVANZADA
     # =========================================================================
     with tab1:
-        colA, colB = st.columns(2)
-        
-        with colA:
-            st.subheader("🤖 Algoritmos de IA")
-            
-            # Datos enriquecidos con explicaciones para el tooltip (hover)
-            algoritmos_data = [
-                {'Algoritmo': 'Random Forest', 'Uso': df_filtrado['Abstract_Clean'].str.contains('random forest| rf ').sum(),
-                 'Explicacion': 'Bosque de árboles de decisión que votan para un resultado.'},
-                {'Algoritmo': 'Redes Neuronales', 'Uso': df_filtrado['Abstract_Clean'].str.contains('neural network|deep learning').sum(),
-                 'Explicacion': 'Sistemas que imitan neuronas humanas para patrones complejos.'},
-                {'Algoritmo': 'XGBoost', 'Uso': df_filtrado['Abstract_Clean'].str.contains('xgboost|gradient boosting').sum(),
-                 'Explicacion': 'Algoritmo potente que corrige errores de modelos anteriores.'},
-                {'Algoritmo': 'SVM', 'Uso': df_filtrado['Abstract_Clean'].str.contains('svm|support vector machine').sum(),
-                 'Explicacion': 'Línea fronteriza matemática que separa clientes.'}
-            ]
-            df_alg = pd.DataFrame(algoritmos_data).sort_values(by='Uso')
-            
-            fig_bar_alg = px.bar(
-                df_alg, x='Uso', y='Algoritmo', orientation='h',
-                color='Uso', color_continuous_scale=['#FF1493', '#00CED1'],
-                custom_data=['Explicacion'], # Se pasa la explicación oculta
-                title="Pasa el mouse sobre las barras"
-            )
-            # Personalizar lo que dice cuando pasas el ratón
-            fig_bar_alg.update_traces(hovertemplate="<b>%{y}</b><br>Menciones en papers: %{x}<br><br><i>¿Qué es?: %{customdata[0]}</i><extra></extra>")
-            fig_bar_alg.update_layout(xaxis_title="", yaxis_title="")
-            st.plotly_chart(fig_bar_alg, use_container_width=True)
-            
-            with st.expander("📖 ¿Cómo leer este gráfico?"):
-                st.write("**Representa:** Cuántas veces los científicos mencionan usar cada algoritmo.")
-                st.write("**Uso:** El algoritmo con la barra más larga es el más probado. Un banco debería empezar por aquí.")
-
-        with colB:
-            st.subheader("🔍 Interpretabilidad vs. Caja Negra")
-            exp_count = df_filtrado['Abstract_Clean'].str.contains('shap|lime|explainabl|interpret').sum()
-            no_exp_count = len(df_filtrado) - exp_count
-            
-            df_pie = pd.DataFrame({
-                'Tipo': ['IA Explicable (XAI)', 'Caja Negra'],
-                'Cantidad': [exp_count, no_exp_count],
-                'Explicacion': [
-                    'Muestra las razones de la fuga del cliente (ej. SHAP).',
-                    'Acierta en la predicción, pero no explica por qué.'
-                ]
-            })
-            
-            fig_donut = px.pie(
-                df_pie, names='Tipo', values='Cantidad', hole=0.5,
-                color_discrete_sequence=['#00CED1', '#FF1493'],
-                custom_data=['Explicacion'],
-                title="Pasa el mouse sobre el anillo"
-            )
-            fig_donut.update_traces(hovertemplate="<b>%{label}</b><br>Estudios: %{value}<br><br><i>%{customdata[0]}</i><extra></extra>")
-            fig_donut.update_layout(showlegend=False)
-            st.plotly_chart(fig_donut, use_container_width=True)
-            
-            with st.expander("📖 ¿Cómo leer este gráfico?"):
-                st.write("Muestra la proporción de estudios que usan **IA Explicable**. Los bancos prefieren modelos transparentes por temas legales y de confianza.")
-
-    # =========================================================================
-    # PESTAÑA 2: MÉTRICAS DE EVALUACIÓN
-    # =========================================================================
-    with tab2:
         colC, colD = st.columns(2)
         
+        # COLUMNA IZQUIERDA: MÉTRICAS DE EVALUACIÓN
         with colC:
-            st.subheader("🎯 Métricas de Evaluación")
+            st.markdown("### 🎯 Métricas de Evaluación")
             
             metricas_data = [
-                {'Metrica': 'Accuracy', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('accuracy').sum(), 'Desc': 'Porcentaje total de aciertos.'},
-                {'Metrica': 'F1-Score', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('f1|f-measure').sum(), 'Desc': 'Equilibrio entre precisión y recall.'},
-                {'Metrica': 'AUC-ROC', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('auc|roc').sum(), 'Desc': 'Capacidad de distinguir entre clientes.'}
+                {'Metrica': 'Accuracy', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('accuracy').sum(), 'Desc': 'Porcentaje general de aciertos.'},
+                {'Metrica': 'F1-Score', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('f1|f-measure').sum(), 'Desc': 'Balance crítico entre precisión y falsos positivos.'},
+                {'Metrica': 'AUC-ROC', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('auc|roc').sum(), 'Desc': 'Capacidad del modelo para distinguir un cliente leal de uno en riesgo.'}
             ]
             df_metrics = pd.DataFrame(metricas_data)
             
             fig_radar = px.line_polar(
                 df_metrics, r='Menciones', theta='Metrica', line_close=True,
                 custom_data=['Desc'],
-                title="Métricas de Evaluación (Pasa el mouse)",
-                template="plotly_white"
+                template="plotly_dark"
             )
-            fig_radar.update_traces(fill='toself', line_color='#00CED1', hovertemplate="<b>%{theta}</b><br>Menciones: %{r}<br><i>%{customdata[0]}</i><extra></extra>")
+            fig_radar.update_traces(
+                fill='toself', 
+                line_color='#00CED1', 
+                hovertemplate="<b>Métrica: %{theta}</b><br>Frecuencia en industria: %{r}<br><i>%{customdata[0]}</i><extra></extra>"
+            )
+            fig_radar.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                polar=dict(radialaxis=dict(gridcolor='#30363D'), angularaxis=dict(gridcolor='#30363D'))
+            )
             st.plotly_chart(fig_radar, use_container_width=True)
             
-            with st.expander("📖 ¿Cómo leer este gráfico?"):
-                st.write("El polígono muestra la frecuencia de uso de cada métrica. **F1-Score** y **AUC-ROC** son más fiables que **Accuracy** cuando los datos están desbalanceados (poca gente se va).")
+            with st.expander("📖 Guía de Interpretación Exclusiva"):
+                st.markdown("""
+                * **¿Qué significa?** Muestra qué herramientas matemáticas prefieren los científicos de datos para certificar que un modelo de fuga es seguro y preciso.
+                * **¿Qué representa?** El área cubierta del polígono representa el estándar de validación en la banca actual.
+                * **¿Cómo se lee este gráfico?** Mientras más se extienda el polígono hacia un extremo, mayor es el consenso de la industria en usar esa métrica específica.
+                """)
+            
+            # BLOQUE INTERACTIVO SOLICITADO: SIMULADOR DE CASO DE NEGOCIO
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #FF1493;'>🧪 Laboratorio de Simulación Corporativa</h4>", unsafe_allow_html=True)
+            metric_choice = st.selectbox(
+                "Haz clic aquí y selecciona una métrica para ver un ejemplo de aplicación en banca:",
+                ["Selecciona una opción...", "F1-Score", "AUC-ROC", "Accuracy"]
+            )
+            
+            if metric_choice == "F1-Score":
+                st.info("💡 **Caso Real en Churn:** El Churn está severamente desbalanceado (ej. solo el 2% de tus clientes se va). Si usas *Accuracy*, un modelo perezoso que diga 'Nadie se irá' tendrá 98% de éxito pero perderás millones. El **F1-Score** obliga al modelo a encontrar eficazmente al 2% real sin equivocarse.")
+            elif metric_choice == "AUC-ROC":
+                st.info("💡 **Caso Real en Churn:** El **AUC-ROC** te ayuda a ordenar a los clientes de un banco mediante un score de 0 a 100. Permite al equipo de marketing definir el 'umbral de corte': a partir de un 85% de probabilidad de fuga, se dispara automáticamente un bono de retención.")
+            elif metric_choice == "Accuracy":
+                st.warning("⚠️ **Alerta de Riesgo:** En predicción de Churn Bancario, confiar ciegamente en el *Accuracy* es un error crítico de novato debido al desbalance de las clases. Se utiliza únicamente como métrica de control secundario.")
 
+        # COLUMNA DERECHA: VARIABLES PREDICTORAS (TREEMAP)
         with colD:
-            st.subheader("🧩 Variables Predictoras")
+            st.markdown("### 🧩 Variables Predictoras")
             
             features_data = [
-                {'Categoria': 'Transacciones', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('transaction|behavio').sum(), 'Desc': 'Uso, montos gastados.'},
-                {'Categoria': 'Credit Score', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('credit score').sum(), 'Desc': 'Pagos, deudas.'},
-                {'Categoria': 'Demografía', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('demograph|age|gender').sum(), 'Desc': 'Edad, género, ciudad.'}
+                {'Categoria': 'Transacciones', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('transaction|behavio').sum(), 'Desc': 'Fluctuaciones de saldo, frecuencia de uso de apps, caída en depósitos.'},
+                {'Categoria': 'Credit Score', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('credit score|credit history').sum(), 'Desc': 'Historial crediticio, deudas externas y comportamiento de pago.'},
+                {'Categoria': 'Demografía', 'Menciones': df_filtrado['Abstract_Clean'].str.contains('demograph|age|gender').sum(), 'Desc': 'Edad, ingresos estimados, ubicación geográfica.'}
             ]
             df_feat = pd.DataFrame(features_data)
             
             fig_tree = px.treemap(
                 df_feat, path=['Categoria'], values='Menciones',
-                custom_data=['Desc'], color='Menciones', color_continuous_scale=['#FF1493', '#00CED1'],
-                title="Pasa el mouse sobre los cuadros"
+                custom_data=['Desc'], 
+                color='Menciones', 
+                color_continuous_scale=['#FF1493', '#00CED1'],
+                template="plotly_dark"
             )
-            fig_tree.update_traces(hovertemplate="<b>Datos de %{label}</b><br>Menciones: %{value}<br><i>%{customdata[0]}</i><extra></extra>")
+            fig_tree.update_traces(hovertemplate="<b>Módulo: %{label}</b><br>Estudios que lo respaldan: %{value}<br><i>%{customdata[0]}</i><extra></extra>")
+            fig_tree.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_tree, use_container_width=True)
             
-            with st.expander("📖 ¿Cómo leer este gráfico?"):
-                st.write("El tamaño del cuadro representa la frecuencia de uso de cada tipo de dato. Las variables **Transaccionales** suelen ser las más poderosas para predecir la fuga.")
+            with st.expander("📖 Guía de Interpretación Exclusiva"):
+                st.markdown("""
+                * **¿Qué significa?** Clasifica los grupos de datos del cliente que alimentan al algoritmo para que este aprenda a detectar anomalías.
+                * **¿Qué representa?** Representa los pilares lógicos del *Feature Engineering* (Ingeniería de Variables) financiero.
+                * **¿Cómo se lee este gráfico?** El volumen del cuadro es proporcional a la importancia y uso en la literatura científica. Los cuadros más grandes indican datos con mayor poder predictivo.
+                """)
+
+            # BLOQUE INTERACTIVO SOLICITADO: EJEMPLO DE DATA ENGINEERING
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #FF1493;'>🛠️ Feature Engineering Hub</h4>", unsafe_allow_html=True)
+            feat_choice = st.selectbox(
+                "Haz clic aquí y selecciona un tipo de variable para ver un ejemplo de arquitectura de datos:",
+                ["Selecciona una opción...", "Transacciones", "Credit Score", "Demografía"]
+            )
+            
+            if feat_choice == "Transacciones":
+                st.info("⚙️ **Extracción de Variables:** La startup calcula la tasa de decaimiento del saldo (ej. si el cliente redujo sus depósitos un 40% en los últimos 45 días). Este cambio de comportamiento es el indicador más fuerte de que el cliente está usando otro banco.")
+            elif feat_choice == "Credit Score":
+                st.info("⚙️ **Extracción de Variables:** Un aumento repentino en las consultas de su historial crediticio sugiere que el cliente busca financiamiento externo. Si el algoritmo detecta esto combinado con inactividad transaccional, eleva el nivel de riesgo de fuga.")
+            elif feat_choice == "Demografía":
+                st.info("⚙️ **Extracción de Variables:** Permite segmentar el ciclo de vida del cliente. Los jóvenes adultos (20-30 años) presentan un Churn significativamente más alto debido a la volatilidad del mercado y ofertas competitivas en canales 100% digitales.")
 
     # =========================================================================
-    # PESTAÑA 3: IMPACTO GLOBAL
+    # PESTAÑA 2: EVIDENCIA CIENTÍFICA (SOPORTE RIGUROSO)
     # =========================================================================
-    with tab3:
-        st.subheader("🌍 Impacto Global")
+    with tab2:
+        st.markdown("### 🧠 Respaldo de Investigaciones Scopus (2025-2026)")
+        st.markdown("Todo algoritmo implementado en producción por la Startup está sustentado en papers indexados de alta autoridad.")
         
         df_mostrar = df_filtrado[['Title', 'Year', 'Cited by', 'Revista Corta', 'Link']].copy()
         
@@ -178,10 +191,10 @@ def main():
             use_container_width=True, 
             hide_index=True,
             column_config={
-                "Title": st.column_config.TextColumn("Título"),
+                "Title": st.column_config.TextColumn("Título del Estudio Científico"),
                 "Year": st.column_config.NumberColumn("Año", format="%d"),
-                "Cited by": st.column_config.ProgressColumn("Citas", format="%d", min_value=0, max_value=int(df['Cited by'].max())),
-                "Link": st.column_config.LinkColumn("Leer Paper")
+                "Cited by": st.column_config.ProgressColumn("Impacto (Citas)", format="%d", min_value=0, max_value=int(df['Cited by'].max())),
+                "Link": st.column_config.LinkColumn("Enlace Oficial Scopus")
             }
         )
 
