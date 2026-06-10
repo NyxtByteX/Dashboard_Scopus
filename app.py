@@ -219,35 +219,77 @@ def main():
                 st.caption("Sin datos para segmentar.")
 
         st.markdown("<br><br>", unsafe_allow_html=True)
-        st.markdown("---")
+st.markdown("---")
         
-        # 5. GRÁFICA DE TENDENCIAS CONTINUAS Y MADUREZ (SE MANTIENE ABAJO COMO LÍNEA FINAL)
-        col_trend, col_violin = st.columns([2, 1])
-        with col_trend:
-            st.markdown("#### 📈 Evolución Histórica de Dimensiones Críticas de Entrada (Trendline Analysis)")
-            if len(df_filtrado) > 0:
-                text_comb = df_filtrado['Abstract_Clean'] + " " + df_filtrado['Title'].str.lower()
-                df_trends = pd.DataFrame({
-                    'Año': df_filtrado['Year'],
-                    '📱 Transacciones e Interactividad': text_comb.str.contains('transaction|behavio|digital|channel|yape|plin').astype(int),
-                    '💳 Historial Crediticio (SBS)': text_comb.str.contains('credit|score|history|risk|sbs|infocorp').astype(int),
-                    '👤 Datos Demográficos y Perfil': text_comb.str.contains('demograph|age|gender|income|status|sueldo').astype(int)
-                })
-                df_trends_grouped = df_trends.groupby('Año').sum().reset_index()
-                df_melted = df_trends_grouped.melt(id_vars='Año', var_name='Dimensión Crítica', value_name='Cantidad de Investigaciones')
-                
-                fig_line = px.line(df_melted, x="Año", y="Cantidad de Investigaciones", color="Dimensión Crítica",
-                                   color_discrete_map={"📱 Transacciones e Interactividad": "#00CED1", "💳 Historial Crediticio (SBS)": "#FF1493", "👤 Datos Demográficos y Perfil": "#FFFF00"},
-                                   template="plotly_dark", markers=True)
-                fig_line.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', hovermode="x unified", margin=dict(l=10, r=10, t=10, b=10))
-                st.plotly_chart(fig_line, use_container_width=True)
-        
-        with col_violin:
-            st.markdown("#### 📈 Distribución de Madurez")
-            fig_violin = px.violin(df_filtrado, x="Year", y="Cited by", box=True, points="all", template="plotly_dark", color_discrete_sequence=["#00CED1"])
-            fig_violin.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=10, r=10, t=10, b=10))
-            st.plotly_chart(fig_violin, use_container_width=True)
+        # 5. GRÁFICA DE TENDENCIAS CONTINUAS (Ahora en su propia línea a ancho completo)
+        st.markdown("#### 📈 Evolución Histórica de Dimensiones Críticas de Entrada (Trendline Analysis)")
+        if len(df_filtrado) > 0:
+            text_comb = df_filtrado['Abstract_Clean'] + " " + df_filtrado['Title'].str.lower()
+            df_trends = pd.DataFrame({
+                'Año': df_filtrado['Year'],
+                '📱 Transacciones e Interactividad': text_comb.str.contains('transaction|behavio|digital|channel|yape|plin').astype(int),
+                '💳 Historial Crediticio (SBS)': text_comb.str.contains('credit|score|history|risk|sbs|infocorp').astype(int),
+                '👤 Datos Demográficos y Perfil': text_comb.str.contains('demograph|age|gender|income|status|sueldo').astype(int)
+            })
+            df_trends_grouped = df_trends.groupby('Año').sum().reset_index()
+            df_melted = df_trends_grouped.melt(id_vars='Año', var_name='Dimensión Crítica', value_name='Cantidad de Investigaciones')
+            
+            fig_line = px.line(
+                df_melted, 
+                x="Año", 
+                y="Cantidad de Investigaciones", 
+                color="Dimensión Crítica",
+                color_discrete_map={
+                    "📱 Transacciones e Interactividad": "#00CED1", 
+                    "💳 Historial Crediticio (SBS)": "#FF1493", 
+                    "👤 Datos Demográficos y Perfil": "#FFFF00"
+                },
+                template="plotly_dark", 
+                markers=True,
+                labels={"Cantidad de Investigaciones": "Número de Papers Publicados", "Año": "Línea de Tiempo (Años)"}
+            )
+            
+            # Ajuste de Leyenda: Posicionada elegantemente arriba o abajo de forma expandida
+            fig_line.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)', 
+                plot_bgcolor='rgba(0,0,0,0)', 
+                hovermode="x unified", 
+                margin=dict(l=10, r=10, t=20, b=20),
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="right",
+                    x=1
+                )
+            )
+            st.plotly_chart(fig_line, use_container_width=True)
+            
+        st.markdown("---") # Separador visual entre ambos gráficos masivos
 
+        # 6. DISTRIBUCIÓN DE MADUREZ (Ahora en su propia línea a ancho completo)
+        st.markdown("#### 📊 Distribución de Madurez e Impacto Científico por Año")
+        if len(df_filtrado) > 0:
+            fig_violin = px.violin(
+                df_filtrado, 
+                x="Year", 
+                y="Cited by", 
+                box=True, 
+                points="all", 
+                template="plotly_dark", 
+                color_discrete_sequence=["#00CED1"],
+                labels={"Year": "Año de Publicación", "Cited by": "Volumen de Citas Recibidas (Scopus)"}
+            )
+            
+            # Optimizamos los ejes para que el gráfico de violín/caja no se vea estirado ni distorsionado
+            fig_violin.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)', 
+                plot_bgcolor='rgba(0,0,0,0)', 
+                margin=dict(l=10, r=10, t=20, b=20)
+            )
+            st.plotly_chart(fig_violin, use_container_width=True)
+        else:
+            st.caption("Sin datos suficientes para generar la curva de madurez.")
     # =========================================================================
     # PESTAÑA 2: SIMULADOR FINANCIERO PERÚ
     # =========================================================================
