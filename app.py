@@ -47,6 +47,18 @@ st.markdown("""
             border-bottom: 1px solid #30363D;
         }
 
+        /* Glosarios y Leyendas Explicativas Inferiores */
+        .chart-glossary {
+            background-color: #161B22;
+            padding: 14px;
+            border-radius: 6px;
+            border: 1px solid #21262D;
+            margin-top: 12px;
+            font-size: 0.88rem;
+            color: #C9D1D9;
+            line-height: 1.4;
+        }
+
         /* Tarjetas de Papers (Top Papers) */
         .paper-card {
             background-color: #161B22;
@@ -180,7 +192,7 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-        # 3. FILA A: DOS GRÁFICOS DE BARRAS SIMÉTRICOS (2 por línea)
+        # 3. FILA A: DOS GRÁFICOS DE BARRAS SIMÉTRICOS
         col_barras1, col_barras2 = st.columns(2)
         
         with col_barras1:
@@ -192,6 +204,16 @@ def main():
             fig_words = px.bar(df_conceptos, x='Frecuencia', y='Concepto', orientation='h', template='plotly_dark', color='Frecuencia', color_continuous_scale=['#FF1493', "#00CED1"])
             fig_words.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=15, b=10))
             st.plotly_chart(fig_words, use_container_width=True)
+            
+            # Glosario Explicativo Gráfico 1
+            st.markdown("""
+            <div class="chart-glossary">
+                <b>💡 Glosario de Conceptos de Riesgo:</b><br>
+                • <b>CHURN / BANKING:</b> Volumen de investigaciones enfocadas estrictamente en la pérdida y retención de clientes en banca.<br>
+                • <b>RISK / CREDIT:</b> Estudios dirigidos a mitigar el peligro crediticio o de impago financiero.<br>
+                • <b>ACCURACY / NEURAL:</b> Documentos técnicos que priorizan la precisión algorítmica mediante redes neuronales complejas.
+            </div>
+            """, unsafe_allow_html=True)
 
         with col_barras2:
             st.markdown("#### 🎯 Predominancia de Métricas")
@@ -204,10 +226,20 @@ def main():
             fig_bar = px.bar(df_m, x="Papers", y="Métrica", orientation="h", template="plotly_dark", color="Papers", color_continuous_scale=["#FF1493", "#00CED1"])
             fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', coloraxis_showscale=False, margin=dict(l=10, r=10, t=15, b=10))
             st.plotly_chart(fig_bar, use_container_width=True)
+            
+            # Glosario Explicativo Gráfico 2
+            st.markdown("""
+            <div class="chart-glossary">
+                <b>💡 Guía de Métricas de Machine Learning:</b><br>
+                • <b>Accuracy (Exactitud):</b> Porcentaje total de predicciones correctas del modelo. Puede ser engañoso si los datos de fuga están desbalanceados.<br>
+                • <b>F1-Score:</b> Balance armónico entre precisión y exhaustividad. Es la métrica reina cuando hay pocos clientes que fugan frente a muchos que se quedan.<br>
+                • <b>AUC-ROC:</b> Mide la capacidad del modelo para separar correctamente a un cliente leal de uno en riesgo de abandono.
+            </div>
+            """, unsafe_allow_html=True)
 
         st.markdown("---")
 
-        # 4. FILA B: ORIGEN DE VALIDACIÓN (Dona Centralizada en su propia línea)
+        # 4. FILA B: ORIGEN DE VALIDACIÓN (Dona Centralizada)
         col_pie_izq, col_pie_centro, col_pie_der = st.columns([0.5, 1, 0.5])
         with col_pie_centro:
             st.markdown("<h4 style='text-align: center;'>🔬 Origen de Validación Académica (Distribución de Literatura)</h4>", unsafe_allow_html=True)
@@ -215,6 +247,16 @@ def main():
                 fig_pie = px.pie(df_filtrado, names='Document Type', template='plotly_dark', hole=0.4, color_discrete_sequence=["#00CED1", "#FF1493", "#FFFF00", "#FF4500"])
                 fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=10, r=10, t=10, b=10), legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
                 st.plotly_chart(fig_pie, use_container_width=True)
+                
+                # Glosario Explicativo Gráfico 3
+                st.markdown("""
+                <div class="chart-glossary" style="text-align: justify;">
+                    <b>📊 Tipos de Documentación Científica y su Utilidad Comercial:</b><br>
+                    • <b>Article (Artículo de Revista):</b> Investigaciones maduras, revisadas por pares y con validaciones matemáticas extensas. Ideal para sustentar metodologías robustas.<br>
+                    • <b>Conference Paper (Actas de Congresos):</b> Tecnologías disruptivas y algoritmos emergentes de última generación que se exponen rápidamente en la industria tecnológica.<br>
+                    • <b>Book / Book Chapter:</b> Compendios teóricos y marcos de trabajo globales útiles para estructurar la gobernanza de datos a nivel corporativo.
+                </div>
+                """, unsafe_allow_html=True)
             else:
                 st.caption("Sin datos para segmentar.")
 
@@ -252,17 +294,21 @@ def main():
             fig_line.update_layout(
                 paper_bgcolor='rgba(0,0,0,0)', 
                 plot_bgcolor='rgba(0,0,0,0)', 
-                hovermode="closest",  # Foco en un solo punto al interactuar
+                hovermode="closest",
                 margin=dict(l=10, r=10, t=30, b=20),
-                legend=dict(
-                    orientation="h",
-                    yanchor="top",
-                    y=-0.18,          # Leyenda recolocada abajo para limpieza total
-                    xanchor="center",
-                    x=0.5
-                )
+                legend=dict(orientation="h", yanchor="top", y=-0.18, xanchor="center", x=0.5)
             )
             st.plotly_chart(fig_line, use_container_width=True)
+            
+            # Glosario Explicativo Gráfico 4
+            st.markdown("""
+            <div class="chart-glossary">
+                <b>📈 Significado de las Dimensiones Analizadas (Inputs del Modelo):</b><br>
+                • <b>📱 Transacciones e Interactividad:</b> Mide la frecuencia de uso de billeteras digitales (Yape/Plin) y canales web. Si baja la interacción, el riesgo de fuga se dispara de inmediato.<br>
+                • <b>💳 Historial Crediticio (SBS):</b> Reportes de endeudamiento externo y variaciones en el score crediticio regulado. Detecta si el cliente se está financiando con la competencia.<br>
+                • <b>👤 Datos Demográficos y Perfil:</b> Variables base estables (edad, nivel de ingresos consolidados, variaciones salariales) utilizadas para segmentar el comportamiento del usuario.
+            </div>
+            """, unsafe_allow_html=True)
             
         st.markdown("---")
 
@@ -285,6 +331,15 @@ def main():
                 margin=dict(l=10, r=10, t=20, b=20)
             )
             st.plotly_chart(fig_violin, use_container_width=True)
+            
+            # Glosario Explicativo Gráfico 5
+            st.markdown("""
+            <div class="chart-glossary">
+                <b>📊 Guía de Interpretación de Madurez de la Literatura (Gráfico de Violín/Caja):</b><br>
+                • <b>Eje Vertical (Citas Scopus):</b> Representa el peso o la influencia mundial que posee un estudio. A mayor cantidad de citas, más validado y probado está ese algoritmo en entornos reales.<br>
+                • <b>Cuerpo del Violín (Puntos Dispersos):</b> Cada punto flotante es un paper. Las concentraciones densas muestran los años donde la industria unificó criterios, mientras que los puntos solitarios en la cima son las metodologías "Récord" o pilares de la analítica predictiva bancaria.
+            </div>
+            """, unsafe_allow_html=True)
         else:
             st.caption("Sin datos suficientes para generar la curva de madurez.")
 
