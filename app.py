@@ -172,47 +172,6 @@ def main():
         st.success("✅ Dataset externo cargado e integrado dinámicamente.")
     else:
         st.info(f"ℹ️ Datos activos: Consumiendo de manera directa desde el repositorio (`{nombre_archivo_base}`).")
-    # --- 3. BARRA LATERAL (Panel de Control y Auditoría de Negocio) ---
-    with st.sidebar:
-        st.image("https://cdn-icons-png.flaticon.com/512/2103/2103832.png", width=50)
-        st.title("Auditoría de Modelos")
-        st.markdown("Configura el alcance técnico y el nivel de validación comercial para el ecosistema predictivo.")
-        st.markdown("---")
-        
-        categoria_ia = st.selectbox(
-            "⚙️ Arquitectura del Modelo de IA:",
-            options=["Todos los Modelos", "Redes Neuronales / Deep Learning", "Árboles de Decisión / XGBoost", "Regresión Logística / Scoring Tradicional"]
-        )
-        
-        busqueda = ""
-        if categoria_ia == "Redes Neuronales / Deep Learning":
-            busqueda = "neural|deep learning"
-        elif categoria_ia == "Árboles de Decisión / XGBoost":
-            busqueda = "tree|forest|xgboost|boosting"
-        elif categoria_ia == "Regresión Logística / Scoring Tradicional":
-            busqueda = "logistic|regression|statistical"
-            
-        max_citas_posibles = int(df['Cited by'].max()) if len(df) > 0 else 100
-        min_citas = st.slider(
-            "🛡️ Grado de Respaldo e Impacto en la Industria (Citas Mínimas):", 
-            min_value=0, 
-            max_value=max_citas_posibles, 
-            value=0,
-            help="Filtra las tecnologías según su nivel de réplica y éxito validado en la comunidad financiera global."
-        )
-        
-        st.markdown("---")
-        st.caption("⚡ Powered by ChurnAI Engine v3.5 • Mercado Peruano 2026")
-
-    # Filtrado Dinámico de Datos
-    df_filtrado = df[df['Cited by'] >= min_citas].copy()
-    if busqueda:
-        df_filtrado = df_filtrado[df_filtrado['Abstract_Clean'].str.contains(busqueda.lower()) | 
-                                  df_filtrado['Title'].str.lower().str.contains(busqueda.lower())]
-
-    # --- ENCABEZADO CORPORATIVO ---
-    st.title("🔮 ChurnAI Horizon Dashboard")
-    st.markdown("<p style='color:#8B949E; font-size:1.1rem; margin-top:-10px;'>Plataforma Ejecutiva de Inteligencia Analítica Aplicada al Riesgo Financiero</p>", unsafe_allow_html=True)
     
     # --- CÁLCULO DE PESOS PARA EL MOTOR CONECTOR ---
     menciones_trans = df_filtrado['Abstract_Clean'].str.contains('transaction|behavio|digital|channel').sum()
