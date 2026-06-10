@@ -174,7 +174,7 @@ def main():
             st.markdown("""
                 <div style='background-color: #0B0E14; padding: 12px; border-radius: 6px; border: 1px solid #30363D; margin-bottom: 8px;'>
                     <p style='margin: 0; font-size: 0.9rem; color: #00CED1; font-weight: bold;'>Peter Cajusol</p>
-                    
+                </div>    
                 <div style='background-color: #0B0E14; padding: 12px; border-radius: 6px; border: 1px solid #30363D; margin-bottom: 15px;'>
                     <p style='margin: 0; font-size: 0.9rem; color: #FF1493; font-weight: bold;'>Victoria De la Vega</p>
                 </div>
