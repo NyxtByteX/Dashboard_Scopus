@@ -266,12 +266,26 @@ def main():
 
         st.markdown("---")
 
-        # --- BLOQUE 3: ORIGEN DE VALIDACIÓN (DONA) ---
+        # --- BLOQUE 3: ORIGEN DE VALIDACIÓN (DONA) - CON CORRECCIÓN DEL TEXTO FLOTANTE ---
         col_g3_izq, col_g3_der = st.columns([1, 1], gap="medium")
         
         with col_g3_izq:
             if len(df_filtrado) > 0:
-                fig_pie = px.pie(df_filtrado, names='Document Type', template='plotly_dark', hole=0.4, color_discrete_sequence=["#00CED1", "#FF1493", "#FFFF00", "#FF4500"])
+                fig_pie = px.pie(
+                    df_filtrado, 
+                    names='Document Type', 
+                    template='plotly_dark', 
+                    hole=0.4, 
+                    color_discrete_sequence=["#00CED1", "#FF1493", "#FFFF00", "#FF4500"]
+                )
+                
+                # CORRECCIÓN DE TEXTO FLOTANTE AQUÍ
+                fig_pie.update_traces(
+                    textposition='inside', 
+                    textinfo='percent',    
+                    insidetextorientation='horizontal'
+                )
+                
                 fig_pie.update_layout(
                     title={'text': "<b>Origen de Validación Académica (Distribución de Literatura)</b>", 'y':0.95, 'x':0.0, 'xanchor': 'left', 'yanchor': 'top', 'font': {'size': 16, 'color': '#00CED1'}},
                     paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=10, r=10, t=60, b=50), height=380, legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5)
