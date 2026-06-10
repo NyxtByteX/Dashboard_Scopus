@@ -1,3 +1,8 @@
+Aquí tienes el código completo, limpio y listo para producción. He unificado toda la estructura e integrado el diseño de columnas asimétricas `[1.2, 0.8]` en **todos los bloques gráficos** de la Pestaña 1, dándole al dashboard una simetría visual perfecta y eliminando por completo los espacios vacíos.
+
+Copia y pega este código íntegro en tu archivo `app.py`:
+
+```python
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -208,7 +213,7 @@ def main():
             st.plotly_chart(fig_words, use_container_width=True)
             
         with col_g1_der:
-            st.markdown("<br><br>", unsafe_allow_html=True)  # Alineador simétrico
+            st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("""
             <div class="chart-glossary">
                 <h5 style="color: #00CED1 !important; margin-top: 0; margin-bottom: 10px;">💡 Glosario de Conceptos de Riesgo</h5>
@@ -237,7 +242,7 @@ def main():
             st.plotly_chart(fig_bar, use_container_width=True)
             
         with col_g2_der:
-            st.markdown("<br><br>", unsafe_allow_html=True)  # Alineador simétrico
+            st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("""
             <div class="chart-glossary">
                 <h5 style="color: #FF1493 !important; margin-top: 0; margin-bottom: 10px;">🎯 Guía de Métricas de Machine Learning</h5>
@@ -263,7 +268,7 @@ def main():
                 st.caption("Sin datos para segmentar.")
                 
         with col_g3_der:
-            st.markdown("<br><br>", unsafe_allow_html=True)  # Alineador simétrico
+            st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("""
             <div class="chart-glossary">
                 <h5 style="color: #FFFF00 !important; margin-top: 0; margin-bottom: 10px;">📊 Tipos de Documentación Científica</h5>
@@ -274,84 +279,98 @@ def main():
             </div>
             """, unsafe_allow_html=True)
 
-        st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("---")
         
-        # 4. GRÁFICA DE TENDENCIAS CONTINUAS
-        st.markdown("#### 📈 Evolución Histórica de Dimensiones Críticas de Entrada (Trendline Analysis)")
+        # --- BLOQUE 4: GRÁFICA DE TENDENCIAS CONTINUAS ---
+        st.markdown("### 📈 Evolución Histórica de Dimensiones Críticas de Entrada")
+        
         if len(df_filtrado) > 0:
-            text_comb = df_filtrado['Abstract_Clean'] + " " + df_filtrado['Title'].str.lower()
-            df_trends = pd.DataFrame({
-                'Año': df_filtrado['Year'],
-                '📱 Transacciones e Interactividad': text_comb.str.contains('transaction|behavio|digital|channel|yape|plin').astype(int),
-                '💳 Historial Crediticio (SBS)': text_comb.str.contains('credit|score|history|risk|sbs|infocorp').astype(int),
-                '👤 Datos Demográficos y Perfil': text_comb.str.contains('demograph|age|gender|income|status|sueldo').astype(int)
-            })
-            df_trends_grouped = df_trends.groupby('Año').sum().reset_index()
-            df_melted = df_trends_grouped.melt(id_vars='Año', var_name='Dimensión Crítica', value_name='Cantidad de Investigaciones')
+            col_g4_izq, col_g4_der = st.columns([1.2, 0.8])
             
-            fig_line = px.line(
-                df_melted, 
-                x="Año", 
-                y="Cantidad de Investigaciones", 
-                color="Dimensión Crítica",
-                color_discrete_map={
-                    "📱 Transacciones e Interactividad": "#00CED1", 
-                    "💳 Historial Crediticio (SBS)": "#FF1493", 
-                    "👤 Datos Demográficos y Perfil": "#FFFF00"
-                },
-                template="plotly_dark", 
-                markers=True,
-                labels={"Cantidad de Investigaciones": "Número de Papers Publicados", "Año": "Línea de Tiempo (Años)"}
-            )
-            
-            fig_line.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)', 
-                plot_bgcolor='rgba(0,0,0,0)', 
-                hovermode="closest",
-                margin=dict(l=10, r=10, t=30, b=20),
-                legend=dict(orientation="h", yanchor="top", y=-0.18, xanchor="center", x=0.5)
-            )
-            st.plotly_chart(fig_line, use_container_width=True)
-            
-            st.markdown("""
-            <div class="chart-glossary" style="margin-top: 15px;">
-                <b>📈 Significado de las Dimensiones Analizadas (Inputs del Modelo):</b><br>
-                • <b>📱 Transacciones e Interactividad:</b> Mide la frecuencia de uso de billeteras digitales (Yape/Plin) y canales web. Si baja la interacción, el riesgo de fuga se dispara de inmediato.<br>
-                • <b>💳 Historial Crediticio (SBS):</b> Reportes de endeudamiento externo y variaciones en el score crediticio regulado. Detecta si el cliente se está financiarizando con la competencia.<br>
-                • <b>👤 Datos Demográficos y Perfil:</b> Variables base estables (edad, nivel de ingresos consolidados, variaciones salariales) utilizadas para segmentar el comportamiento del usuario.
-            </div>
-            """, unsafe_allow_html=True)
-            
+            with col_g4_izq:
+                text_comb = df_filtrado['Abstract_Clean'] + " " + df_filtrado['Title'].str.lower()
+                df_trends = pd.DataFrame({
+                    'Año': df_filtrado['Year'],
+                    '📱 Transacciones e Interactividad': text_comb.str.contains('transaction|behavio|digital|channel|yape|plin').astype(int),
+                    '💳 Historial Crediticio (SBS)': text_comb.str.contains('credit|score|history|risk|sbs|infocorp').astype(int),
+                    '👤 Datos Demográficos y Perfil': text_comb.str.contains('demograph|age|gender|income|status|sueldo').astype(int)
+                })
+                df_trends_grouped = df_trends.groupby('Año').sum().reset_index()
+                df_melted = df_trends_grouped.melt(id_vars='Año', var_name='Dimensión Crítica', value_name='Cantidad de Investigaciones')
+                
+                fig_line = px.line(
+                    df_melted, 
+                    x="Año", 
+                    y="Cantidad de Investigaciones", 
+                    color="Dimensión Crítica",
+                    color_discrete_map={
+                        "📱 Transacciones e Interactividad": "#00CED1", 
+                        "💳 Historial Crediticio (SBS)": "#FF1493", 
+                        "👤 Datos Demográficos y Perfil": "#FFFF00"
+                    },
+                    template="plotly_dark", 
+                    markers=True,
+                    labels={"Cantidad de Investigaciones": "Número de Papers Publicados", "Año": "Línea de Tiempo (Años)"}
+                )
+                
+                fig_line.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)', 
+                    plot_bgcolor='rgba(0,0,0,0)', 
+                    hovermode="closest",
+                    margin=dict(l=10, r=10, t=15, b=10),
+                    legend=dict(orientation="h", yanchor="top", y=-0.18, xanchor="center", x=0.5)
+                )
+                st.plotly_chart(fig_line, use_container_width=True)
+                
+            with col_g4_der:
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown("""
+                <div class="chart-glossary">
+                    <h5 style="color: #00CED1 !important; margin-top: 0; margin-bottom: 10px;">📉 Análisis de Variables Críticas (Inputs)</h5>
+                    <p style="margin-bottom: 8px;">Este análisis predictivo de líneas de tendencia evalúa el nivel de atención que la ciencia otorga a los pilares de comportamiento financiero:</p>
+                    • <b>📱 Transacciones:</b> Mide la frecuencia de uso en ecosistemas móviles (Yape/Plin) y canales web. Es el indicador más rápido para detectar desinterés.<br>
+                    • <b>💳 Historial Crediticio (SBS):</b> Variaciones en el score de sobreendeudamiento externo. Detecta si el usuario busca sustitutos financieros.<br>
+                    • <b>👤 Datos Demográficos:</b> Variables estructurales base (ingresos, edad, geolocalización) para la segmentación de riesgo.
+                </div>
+                """, unsafe_allow_html=True)
+                
         st.markdown("---")
 
-        # 5. DISTRIBUCIÓN DE MADUREZ
-        st.markdown("#### 📊 Distribución de Madurez e Impacto Científico por Año")
+        # --- BLOQUE 5: DISTRIBUCIÓN DE MADUREZ ---
+        st.markdown("### 📊 Distribución de Madurez e Impacto Científico por Año")
+        
         if len(df_filtrado) > 0:
-            fig_violin = px.violin(
-                df_filtrado, 
-                x="Year", 
-                y="Cited by", 
-                box=True, 
-                points="all", 
-                template="plotly_dark", 
-                color_discrete_sequence=["#00CED1"],
-                labels={"Year": "Año de Publicación", "Cited by": "Volumen de Citas Recibidas (Scopus)"}
-            )
-            fig_violin.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)', 
-                plot_bgcolor='rgba(0,0,0,0)', 
-                margin=dict(l=10, r=10, t=20, b=20)
-            )
-            st.plotly_chart(fig_violin, use_container_width=True)
+            col_g5_izq, col_g5_der = st.columns([1.2, 0.8])
             
-            st.markdown("""
-            <div class="chart-glossary" style="margin-top: 15px;">
-                <b>📊 Guía de Interpretación de Madurez de la Literatura (Gráfico de Violín/Caja):</b><br>
-                • <b>Eje Vertical (Citas Scopus):</b> Representa el peso o la influencia mundial que posee un estudio. A mayor cantidad de citas, más validado y probado está ese algoritmo en entornos reales.<br>
-                • <b>Cuerpo del Violín (Puntos Dispersos):</b> Cada punto flotante es un paper. Las concentraciones densas muestran los años donde la industria unificó criterios, mientras que los puntos solitarios en la cima son las metodologías "Récord" o pilares de la analítica predictiva bancaria.
-            </div>
-            """, unsafe_allow_html=True)
+            with col_g5_izq:
+                fig_violin = px.violin(
+                    df_filtrado, 
+                    x="Year", 
+                    y="Cited by", 
+                    box=True, 
+                    points="all", 
+                    template="plotly_dark", 
+                    color_discrete_sequence=["#00CED1"],
+                    labels={"Year": "Año de Publicación", "Cited by": "Volumen de Citas Recibidas (Scopus)"}
+                )
+                fig_violin.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)', 
+                    plot_bgcolor='rgba(0,0,0,0)', 
+                    margin=dict(l=10, r=10, t=15, b=10)
+                )
+                st.plotly_chart(fig_violin, use_container_width=True)
+                
+            with col_g5_der:
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown("""
+                <div class="chart-glossary">
+                    <h5 style="color: #FF1493 !important; margin-top: 0; margin-bottom: 10px;">🛡️ Interpretación de Impacto Bibliométrico</h5>
+                    <p style="margin-bottom: 8px;">Analiza la dispersión, consistencia y madurez del respaldo algorítmico a lo largo del tiempo:</p>
+                    • <b>Eje Vertical (Citas Scopus):</b> Cuantifica el nivel de réplica y validación internacional que sostiene cada metodología.<br>
+                    • <b>Densidad del Gráfico:</b> Las zonas más anchas muestran las tendencias donde la industria consolidó estándares homogéneos.<br>
+                    • <b>Puntos Aislados (Outliers):</b> Representan papers pilar de la analítica de Churn, ideales para auditorías de alta exigencia técnica.
+                </div>
+                """, unsafe_allow_html=True)
         else:
             st.caption("Sin datos suficientes para generar la curva de madurez.")
 
